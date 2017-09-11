@@ -1,0 +1,19 @@
+{
+  "name": "graph_wiget",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/callin2/graph_wiget.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/callin2/graph_wiget/issues"
+  },
+  "homepage": "https://github.com/callin2/graph_wiget#readme"
+}
