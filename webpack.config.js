@@ -35,6 +35,10 @@ module.exports = {
                 use: ['style-loader','css-loader','stylus-loader']
             },
             {
+                "test": /\.css$/,
+                use: ['style-loader','css-loader']
+            },
+            {
                 test: /\.ts$/,
                 // loader: 'ts-loader',
                 loader: 'awesome-typescript-loader',

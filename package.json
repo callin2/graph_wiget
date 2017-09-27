@@ -19,6 +19,7 @@
   "dependencies": {
     "cytoscape": "^3.2.3",
     "cytoscape-cxtmenu": "^2.10.3",
+    "cytoscape-euler": "^1.0.0",
     "cytoscape-panzoom": "^2.5.2",
     "cytoscape-qtip": "^2.7.1",
     "cytoscape.js-undo-redo": "^1.0.1",
@@ -26,7 +27,9 @@
   },
   "devDependencies": {
     "awesome-typescript-loader": "^3.2.3",
+    "css-loader": "^0.28.7",
     "cytoscape-view-utilities": "^2.0.6",
+    "style-loader": "^0.18.2",
     "typedoc": "^0.8.0",
     "typedoc-webpack-plugin": "^1.1.4",
     "webpack": "^3.5.6"

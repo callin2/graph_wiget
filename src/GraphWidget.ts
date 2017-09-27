@@ -5,6 +5,12 @@ import * as viewUtilities from 'cytoscape-view-utilities'
 import * as cxtmenu   from 'cytoscape-cxtmenu';
 import * as cyqtip from 'cytoscape-qtip';
 import * as panzoom from 'cytoscape-panzoom';
+require('cytoscape-panzoom/cytoscape.js-panzoom.css')
+
+import * as euler from 'cytoscape-euler';
+
+// console.log(euler, panzoom)
+
 
 import * as jquery from 'jquery'
 
@@ -199,6 +205,28 @@ var defaultStyle = [
 ];
 
 var layoutPreset = {
+    euler: {
+        name: 'euler',
+        springLength: edge => 80,
+        springCoeff: edge => 0.0008,
+        mass: node => 4,
+        gravity: -1.2,
+        theta: 0.666,
+        dragCoeff: 0.02,
+        movementThreshold: 1,
+        timeStep: 20,
+        refresh: 10,
+        animate: true,
+        animationDuration: undefined,
+        animationEasing: undefined,
+        maxIterations: 1000,
+        maxSimulationTime: 4000,
+        ungrabifyWhileSimulating: false,
+        fit: true,
+        padding: 30,
+        boundingBox: undefined,
+        randomize: false
+    },
     grid: {
         name: 'grid',
         fit: true, // whether to fit the viewport to the graph
@@ -423,7 +451,7 @@ var defaultSetting = {
     wheelSensitivity: 0.7,
     pixelRatio: 'auto',
     extension: {
-        'cyqtip' : true,
+        // 'cyqtip' : true,
         'panzoom' : {
             zoomFactor: 0.05, // zoom factor per zoom tick
             zoomDelay: 45, // how many ms between zoom ticks
@@ -451,17 +479,17 @@ var defaultSetting = {
                 // {evtname: 'node-remove', label: 'Remove', select: "handleNodeLock", emit: true},
                 // {evtname: 'node-hide', label: 'Hide', select: "handleNodeLock", emit: false}
             ],
-            edge: [
-                {evtname: 'edge-prop', label: 'Property', select: "handleEdgeProp", emit: true},
-                {evtname: 'edge-remove', label: 'Remove', select: "handleEdgeRemove", emit: true},
-                {evtname: 'edge-hide', label: 'Hide', select: "handleEdgeHide", emit: false}
-            ],
-            core: [
-                {evtname: 'node-add', label: 'Add Node', select: "handleAddNode", emit: true},
-                {evtname: 'show-all', label: 'Show All', select: "handleShowAll", emit: true},
-                {evtname: 'hide-expand', label: 'Hide Expand', select: "handleAddNode", emit: true},
-                {evtname: 'unlock-all', label: 'Unlock All', select: "handleAddNode", emit: true}
-            ]
+            // edge: [
+            //     {evtname: 'edge-prop', label: 'Property', select: "handleEdgeProp", emit: true},
+            //     {evtname: 'edge-remove', label: 'Remove', select: "handleEdgeRemove", emit: true},
+            //     {evtname: 'edge-hide', label: 'Hide', select: "handleEdgeHide", emit: false}
+            // ],
+            // core: [
+            //     {evtname: 'node-add', label: 'Add Node', select: "handleAddNode", emit: true},
+            //     {evtname: 'show-all', label: 'Show All', select: "handleShowAll", emit: true},
+            //     {evtname: 'hide-expand', label: 'Hide Expand', select: "handleAddNode", emit: true},
+            //     {evtname: 'unlock-all', label: 'Unlock All', select: "handleAddNode", emit: true}
+            // ]
         },
         'undoRedo': true,
         // 'viewUtilities': {
@@ -491,6 +519,7 @@ export class GraphWidget extends EventEmitter {
     ext_unre: any = null;
     rootElement: HTMLElement;
     removeElementWhenDestroy: boolean;
+    layout: any
 
     /**
      *
@@ -511,6 +540,7 @@ export class GraphWidget extends EventEmitter {
             }
         });
 
+        this.initExtLayout_euler()
         this.cy = cytoscape(this.config)
     }
 
@@ -555,7 +585,13 @@ export class GraphWidget extends EventEmitter {
     }
 
     public add(param) {
-        this.cy.add(param)
+        this.cy.add(param);
+    }
+
+    public doLayout() {
+        if(this.layout) this.layout.stop();
+        this.layout = this.cy.makeLayout(this.config.layout)
+        this.layout.run()
     }
 
     //--------------------------------  event handler -------------------------
@@ -565,10 +601,16 @@ export class GraphWidget extends EventEmitter {
         this.ext_unre = this.cy.undoRedo()
     }
 
+    private initExtLayout_euler() {
+        console.log('initExt_euler')
+        // cytoscape.use(euler);
+        euler(cytoscape);
+    }
+
     private initExt_cyqtip() {
         cyqtip(cytoscape);
 
-        this.cy.elements().qtip({
+        this.cy.qtip({
             content: function () {
                 var name = this.data('name');
                 var label = this.data('label');
@@ -620,10 +662,17 @@ export class GraphWidget extends EventEmitter {
         });
     }
 
-    onReady() {
+    initExtension() {
         Object.keys(this.config.extension).forEach((key)=>{
             this['initExt_' + key](this.config.extension[key])
         });
+    }
+
+    onReady() {
+        this.initExtension()
+
+        this.layout = this.cy.makeLayout(this.config.layout)
+        this.layout.run()
 
         // ==========================================
         // ==  cy events 등록
@@ -653,20 +702,5 @@ export class GraphWidget extends EventEmitter {
 
         // 화면에 맞게 elements 정렬
         this.cy.fit(this.cy.elements(), 50); // fit to all the layouts
-
-        /////////////////////////////////////////////////////////
-        //  NAMESPACE: this.api
-        /////////////////////////////////////////////////////////
-
-        // // Public Property : APIs about view and undoredo
-        // this.api.view = this.cy.viewUtilities({
-        //     neighbor: function (node) {
-        //         return node.closedNeighborhood();
-        //     },
-        //     neighborSelectTime: 1000
-        // });
-        //
-        // // Public Property : UndoRedo for cy
-        // this.api.unre = this.cy.undoRedo();
     }
 }
