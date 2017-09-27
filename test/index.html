@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <script src="../dist/GraphWidget.js"></script>
+</head>
+<body>
+
+<div id='graph' style="width: 1200px; height: 800px;border: 1px solid black;"></div>
+
+<script>
+    window.addEventListener('load', function(){
+        console.log('GraphWidget', GraphWidget.GraphWidget)
+        var GW = GraphWidget.GraphWidget
+        var gw = new GW('#graph')
+
+        gw.on('node-expand', (ele)=>{
+           console.log('node-expand', ele);
+        });
+
+        gw.add([
+            { group: "nodes", data: { id: "n0", name:'key'  }, position: { x: 100, y: 100 } },
+            { group: "nodes", data: { id: "n1", name:'value' }, position: { x: 200, y: 200 } },
+            { group: "edges", data: { id: "e0", source: "n0", target: "n1", label:'rel' } }
+        ])
+
+
+
+
+    })
+</script>
+
+</body>
+</html>

@@ -1,5 +1,15 @@
 import * as cytoscape from 'cytoscape';
 
+import * as undoRedo  from 'cytoscape.js-undo-redo/cytoscape-undo-redo.js'
+import * as viewUtilities from 'cytoscape-view-utilities'
+import * as cxtmenu   from 'cytoscape-cxtmenu';
+import * as cyqtip from 'cytoscape-qtip';
+import * as panzoom from 'cytoscape-panzoom';
+
+import * as jquery from 'jquery'
+
+import {EventEmitter} from "./EventEmitter";
+
 //----------------------------------------------------------------------------------
 var defaultStyle = [
     {
@@ -9,7 +19,7 @@ var defaultStyle = [
             "selection-box-opacity": 0.25,
             "selection-box-border-color": "#aaa",
             "selection-box-border-width": 1,
-            "panning-cursor": "grabbing",
+            // "panning-cursor": "grabbing",
         }
     }, {
         selector: 'node',
@@ -23,7 +33,7 @@ var defaultStyle = [
             'text-outline-width': 2,
             'text-outline-color': '#1abde8',
             'background-color': '#1abde8',
-            'shape': 'eclipse',
+            // 'shape': 'eclipse',
             'width': '100px',
             'height': '100px',
             'border-width': '2',
@@ -64,9 +74,8 @@ var defaultStyle = [
             'border-width': 1,
             'width': '50px',
             'height': '50px',
-            'shape': 'eclipse',
-            'border-color': 'white',
-            'border-witdh': 2,
+            // 'shape': 'eclipse',
+            'border-color': 'white'
         }
     }, {
         selector: ':selected',                /// 선택한 노드의 변화 (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)
@@ -413,6 +422,53 @@ var defaultSetting = {
     motionBlurOpacity: 0.2,
     wheelSensitivity: 0.7,
     pixelRatio: 'auto',
+    extension: {
+        'cyqtip' : true,
+        'panzoom' : {
+            zoomFactor: 0.05, // zoom factor per zoom tick
+            zoomDelay: 45, // how many ms between zoom ticks
+            minZoom: 0.1, // min zoom level
+            maxZoom: 10, // max zoom level
+            fitPadding: 50, // padding when fitting
+            panSpeed: 10, // how many ms in between pan ticks
+            panDistance: 10, // max pan distance per tick
+            panDragAreaSize: 75, // the length of the pan drag box in which the vector for panning is calculated (bigger = finer control of pan speed and direction)
+            panMinPercentSpeed: 0.25, // the slowest speed we can pan by (as a percent of panSpeed)
+            panInactiveArea: 8, // radius of inactive area in pan drag box
+            panIndicatorMinOpacity: 0.5, // min opacity of pan indicator (the draggable nib); scales from this to 1.0
+            autodisableForMobile: true, // disable the panzoom completely for mobile (since we don't really need it with gestures like pinch to zoom)
+            // icon class names
+            sliderHandleIcon: 'fa fa-minus',
+            zoomInIcon: 'fa fa-plus',
+            zoomOutIcon: 'fa fa-minus',
+            resetIcon: 'fa fa-expand'
+        },
+        'cxtmenu' : {
+            node: [
+                // {evtname: 'node-lock', label: 'Lock', select: "handleNodeLock", emit: true},
+                // {evtname: 'node-prop', label: 'Property', select: "handleNodeProp", emit: true},
+                {evtname: 'node-expand', label: 'Expand', select: null, emit: true},
+                // {evtname: 'node-remove', label: 'Remove', select: "handleNodeLock", emit: true},
+                // {evtname: 'node-hide', label: 'Hide', select: "handleNodeLock", emit: false}
+            ],
+            edge: [
+                {evtname: 'edge-prop', label: 'Property', select: "handleEdgeProp", emit: true},
+                {evtname: 'edge-remove', label: 'Remove', select: "handleEdgeRemove", emit: true},
+                {evtname: 'edge-hide', label: 'Hide', select: "handleEdgeHide", emit: false}
+            ],
+            core: [
+                {evtname: 'node-add', label: 'Add Node', select: "handleAddNode", emit: true},
+                {evtname: 'show-all', label: 'Show All', select: "handleShowAll", emit: true},
+                {evtname: 'hide-expand', label: 'Hide Expand', select: "handleAddNode", emit: true},
+                {evtname: 'unlock-all', label: 'Unlock All', select: "handleAddNode", emit: true}
+            ]
+        },
+        'undoRedo': true,
+        // 'viewUtilities': {
+        //     neighbor: (node)=>node.closedNeighborhood(),
+        //     neighborSelectTime: 1000
+        // }
+    },
 
     ready: null
 };
@@ -424,22 +480,30 @@ function makeid(): string {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     return text;
 }
-
+interface Point {
+    x: number
+    y: number
+}
 //----------------------------------------------------------------------------------
-export class GraphWidget {
+export class GraphWidget extends EventEmitter {
     cy: any;
+    lastMousePosition: Point;
+    ext_unre: any = null;
     rootElement: HTMLElement;
     removeElementWhenDestroy: boolean;
-
 
     /**
      *
      * @param {string | HTMLElement} rootElement
      */
-    constructor(rootElement?: string | HTMLElement) {
+    constructor(rootElement?: string | HTMLElement, protected config? : any ) {
+        super()
+
         this.initRoot(rootElement);
 
-        let setting = Object.assign({},defaultSetting, {
+        this.config = this.config ? this.config : {};
+
+        this.config = Object.assign({},defaultSetting,this.config,{
             container : this.rootElement,
             ready: (e) => {
                 this.cy = e.cy
@@ -447,7 +511,7 @@ export class GraphWidget {
             }
         });
 
-        this.cy = cytoscape(setting)
+        this.cy = cytoscape(this.config)
     }
 
     /**
@@ -459,9 +523,9 @@ export class GraphWidget {
 
         if (typeof rootElement == 'undefined' || rootElement == null) {
             this.removeElementWhenDestroy = true;
-            this.rootElement.setAttribute("width", "800px");
-            this.rootElement.setAttribute("height", "600px");
             this.rootElement = document.createElement("div");
+            this.rootElement.style.width =  "800px";
+            this.rootElement.style.height= "600px";
 
             document.querySelector('body').appendChild(this.rootElement)
         }
@@ -490,199 +554,75 @@ export class GraphWidget {
 
     }
 
+    public add(param) {
+        this.cy.add(param)
+    }
+
     //--------------------------------  event handler -------------------------
-    onReady() {
 
-        // this.cy.elements().qtip({
-        //     content: function () {
-        //         var name = this.data('name');
-        //         var label = this.data('label');
-        //         var id = this.id();
-        //         return `id: ${id}<br>\nlabel: ${label}<br>\nname: ${name}`;
-        //     },
-        //     position: {
-        //         my: 'bottom left',  // Position my top left...
-        //         at: 'top right', // at the bottom right of...
-        //     },
-        //     style: {
-        //         classes: 'qtip-tipsy qtip-shadow qtip-rounded',
-        //         tip: {
-        //             width: 16,
-        //             height: 8
-        //         }
-        //     }
-        // });
+    private initExt_undoRedo() {
+        undoRedo(cytoscape);
+        this.ext_unre = this.cy.undoRedo()
+    }
 
-        // cxt menu for node, edge
-        this.cy.cxtmenu({
-            selector: 'node',
-            menuRadius: 80,
-            fillColor: 'rgba(50, 0, 0, 0.65)',
-            commands: [
-                {
-                    content: '<span style="display:inline-block; width:20px; font-size:10pt">Lock</span>',
-                    select: function (ele) {
-                        this.cy.$(`[id='${ele.id()}']`).select();
-                        if (this.cy.$(`[id='${ele.id()}']`).locked()) this.cy.$(":selected").unlock();
-                        else this.cy.$(":selected").lock();
+    private initExt_cyqtip() {
+        cyqtip(cytoscape);
 
-                        // Google Analytics: events
-                        ga('send', 'event', 'graph', 'cxtmenu', 'node lock');
-                    }
-                }, {
-                    content: '<span style="display:inline-block; width:20px; font-size:10pt">Property</span>',
-                    select: function (ele) {
-                        this.dialog.openPropertyBox(ele);
-
-                        // Google Analytics: events
-                        ga('send', 'event', 'graph', 'cxtmenu', 'node property');
-                    }
-                }, {
-                    content: '<span style="display:inline-block; width:20px; font-size:10pt">expand</span>',
-                    select: function (ele) {
-                        console.log("ctxmenu[expand]: vid=" + ele.id());
-                        if (window['angularComponentRef']) {
-                            window['angularComponentRef'].zone.run(() => {
-                                window['angularComponentRef'].component.getNeighbors(ele.id());
-                            });
-                        }
-
-                        // Google Analytics: events
-                        ga('send', 'event', 'graph', 'cxtmenu', 'node expand');
-                    }
-                }, {
-                    content: '<span style="display:inline-block; width:20px; font-size:10pt">remove</span>',
-                    select: function (ele) {
-                        this.cy.$(`[id='${ele.id()}']`).select();
-                        this.cy.$(":selected").remove();
-
-                        // Google Analytics: events
-                        ga('send', 'event', 'graph', 'cxtmenu', 'node remove');
-                    }
-                }, {
-                    content: '<span style="display:inline-block; width:20px; font-size:10pt">hide</span>',
-                    select: function (ele) {
-                        this.cy.$(`[id='${ele.id()}']`).select();
-                        this.api.view.hide(this.cy.$(":selected"));
-
-                        // Google Analytics: events
-                        ga('send', 'event', 'graph', 'cxtmenu', 'node hide');
-                    }
-                }
-            ]
-        });
-
-        this.cy.cxtmenu({
-            selector: 'edge',
-            menuRadius: 80,
-            fillColor: 'rgba(50, 0, 0, 0.65)',
-            commands: [
-                {
-                    content: '<span style="display:inline-block; width:20px; font-size:10pt">Property</span>',
-                    select: function (ele) {
-                        this.dialog.openPropertyBox(ele);
-
-                        // Google Analytics: events
-                        ga('send', 'event', 'graph', 'cxtmenu', 'edge property');
-                    }
-                }, {
-                    content: '<span style="display:inline-block; width:20px; font-size:10pt">remove</span>',
-                    select: function (ele) {
-                        this.cy.$(`[id='${ele.id()}']`).select();
-                        this.cy.$(":selected").remove();
-
-                        // Google Analytics: events
-                        ga('send', 'event', 'graph', 'cxtmenu', 'edge remove');
-                    }
-                }, {
-                    content: '<span style="display:inline-block; width:20px; font-size:10pt">hide</span>',
-                    select: function (ele) {
-                        this.cy.$(`[id='${ele.id()}']`).select();
-                        this.api.view.hide(this.cy.$(":selected"));
-
-                        // Google Analytics: events
-                        ga('send', 'event', 'graph', 'cxtmenu', 'edge hide');
-                    }
-                }
-            ]
-        });
-
-        // cxt menu for core
-        this.cy.cxtmenu({
-            menuRadius: 80,
-            selector: 'core',
-            fillColor: 'rgba(0, 60, 0, 0.65)',
-            commands: [{
-                content: '<span style="display:inline-block; width:20px; font-size:10pt">add Node</span>',
-                select: function () {
-                    event.preventDefault();
-                    this.dialog.openAddNodeBox("open");
-
-                    // Google Analytics: events
-                    ga('send', 'event', 'graph', 'cxtmenu', 'node add');
-                }
-            }, {
-                content: '<span style="display:inline-block; width:20px; font-size:10pt">show All</span>',
-                select: function () {
-                    this.api.view.show(this.cy.$(":hidden"));
-
-                    // Google Analytics: events
-                    ga('send', 'event', 'graph', 'cxtmenu', 'show all');
-                },
-            }, {
-                content: '<span style="display:inline-block; width:20px; font-size:10pt">hide Expands</span>',
-                select: function () {
-                    this.cy.$(".expand").remove();
-
-                    // Google Analytics: events
-                    ga('send', 'event', 'graph', 'cxtmenu', 'expand hide');
-                },
-            }, {
-                content: '<span style="display:inline-block; width:20px; font-size:10pt">unlock All</span>',
-                select: function () {
-                    this.cy.$(":locked").unlock();
-
-                    // Google Analytics: events
-                    ga('send', 'event', 'graph', 'cxtmenu', 'unlock all');
-                }
-            }
-            ]
-        });
-
-        // on&off control: cy.edgehandles('enable') or cy.edgehandles('disable')
-        this.cy.edgehandles({
-            toggleOffOnLeave: true,
-            handleNodes: "node",
-            handleSize: 10,
-            edgeType: function () {
-                return 'flat';
-            }
-        });
-
-        this.cy.panzoom({
-            zoomFactor: 0.05, // zoom factor per zoom tick
-            zoomDelay: 45, // how many ms between zoom ticks
-            minZoom: 0.1, // min zoom level
-            maxZoom: 10, // max zoom level
-            fitPadding: 50, // padding when fitting
-            panSpeed: 10, // how many ms in between pan ticks
-            panDistance: 10, // max pan distance per tick
-            panDragAreaSize: 75, // the length of the pan drag box in which the vector for panning is calculated (bigger = finer control of pan speed and direction)
-            panMinPercentSpeed: 0.25, // the slowest speed we can pan by (as a percent of panSpeed)
-            panInactiveArea: 3, // radius of inactive area in pan drag box
-            panIndicatorMinOpacity: 0.5, // min opacity of pan indicator (the draggable nib); scales from this to 1.0
-            autodisableForMobile: true, // disable the panzoom completely for mobile (since we don't really need it with gestures like pinch to zoom)
-            // additional
-            zoomOnly: false, // a minimal version of the ui only with zooming (useful on systems with bad mousewheel resolution)
-            fitSelector: undefined, // selector of elements to fit
-            animateOnFit: function () { // whether to animate on fit
-                return false;
+        this.cy.elements().qtip({
+            content: function () {
+                var name = this.data('name');
+                var label = this.data('label');
+                var id = this.id();
+                return `id: ${id}<br>\nlabel: ${label}<br>\nname: ${name}`;
             },
-            // icon class names
-            sliderHandleIcon: 'fa fa-minus',
-            zoomInIcon: 'fa fa-plus',
-            zoomOutIcon: 'fa fa-minus',
-            resetIcon: 'fa fa-expand'
+            position: {
+                my: 'bottom left',  // Position my top left...
+                at: 'top right', // at the bottom right of...
+            },
+            style: {
+                classes: 'qtip-tipsy qtip-shadow qtip-rounded',
+                tip: {
+                    width: 16,
+                    height: 8
+                }
+            }
+        });
+    }
+
+    private initExt_viewUtilities(option) {
+        viewUtilities(cytoscape, jquery)
+        this.cy.viewUtilities(option)
+    }
+
+    private initExt_panzoom(option) {
+        console.log('panzoom 44')
+        panzoom(cytoscape, jquery)
+        this.cy.panzoom(option)
+    }
+
+    private initExt_cxtmenu(cxtOption) {
+        cxtmenu(cytoscape);
+
+        Object.keys(cxtOption).forEach((k)=>{
+            this.cy.cxtmenu({
+                selector: k,
+                menuRadius: 80,
+                fillColor: 'rgba(50, 0, 0, 0.65)',
+                commands: cxtOption[k].map((menu)=>({
+                    content: `<span style="display:inline-block; width:20px; font-size:10pt">${menu.label}</span>`,
+                    select: (param)=>{
+                        if(menu.select) {  this[menu.select](param) }
+                        if(menu.emit) { this.fire(menu.evtname, param)}
+                    }
+                }))
+
+            })
+        });
+    }
+
+    onReady() {
+        Object.keys(this.config.extension).forEach((key)=>{
+            this['initExt_' + key](this.config.extension[key])
         });
 
         // ==========================================
@@ -690,32 +630,25 @@ export class GraphWidget {
         // ==========================================
 
         this.cy.on('tap', function (e) {
-            // console.log( cyPosition );
-            if (e.cyTarget === this.cy) {
-                this.api.view.removeHighlights();
-                this.cy.$(':selected').unselect();
-                this.graph.pivotNode = null;
+            console.log(e)
+            // if (e.cyTarget === this.cy) {
+            //     this.api.view.removeHighlights();
+            //     this.cy.$(':selected').unselect();
+            //     this.graph.pivotNode = null;
+            // }
 
-                // Google Analytics: events
-                ga('send', 'event', 'graph', 'canvas', 'canvas click');
-            }
+            this.lastMousePosition = e.position;
         });
+
         this.cy.on('tap', 'node', function (e) {
-            this.graph.pivotNode = e.cyTarget;
-            this.api.view.removeHighlights();
-            this.api.view.highlightNeighbors(e.cyTarget);
-
-            // Google Analytics: events
-            ga('send', 'event', 'graph', 'canvas', 'node select');
+            console.log(e)
+            // this.graph.pivotNode = e.cyTarget;
+            // this.api.view.removeHighlights();
+            // this.api.view.highlightNeighbors(e.cyTarget);
         });
-        // this.cy.on('mouseover', 'node', function(e){
-        //   this.addClass('highlighted');
-        // });
-        // this.cy.on('mouseout', 'node', function(e){
-        //   this.removeClass('highlighted');
-        // });
+
         this.cy.on('cxttapstart', function (e) {
-            this.graph.cyPosition = e.cyPosition;
+            this.lastMousePosition = e.position;
         });
 
         // 화면에 맞게 elements 정렬
@@ -725,19 +658,15 @@ export class GraphWidget {
         //  NAMESPACE: this.api
         /////////////////////////////////////////////////////////
 
-        // Public Property : APIs about view and undoredo
-        this.api.view = this.cy.viewUtilities({
-            neighbor: function (node) {
-                return node.closedNeighborhood();
-            },
-            neighborSelectTime: 1000
-        });
-
-        // Public Property : UndoRedo for cy
-        this.api.unre = this.cy.undoRedo();
-
-
+        // // Public Property : APIs about view and undoredo
+        // this.api.view = this.cy.viewUtilities({
+        //     neighbor: function (node) {
+        //         return node.closedNeighborhood();
+        //     },
+        //     neighborSelectTime: 1000
+        // });
+        //
+        // // Public Property : UndoRedo for cy
+        // this.api.unre = this.cy.undoRedo();
     }
-
-
 }

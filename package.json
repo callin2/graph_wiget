@@ -17,9 +17,16 @@
   },
   "homepage": "https://github.com/callin2/graph_wiget#readme",
   "dependencies": {
-    "cytoscape": "^3.2.3"
+    "cytoscape": "^3.2.3",
+    "cytoscape-cxtmenu": "^2.10.3",
+    "cytoscape-panzoom": "^2.5.2",
+    "cytoscape-qtip": "^2.7.1",
+    "cytoscape.js-undo-redo": "^1.0.1",
+    "jquery": "^3.2.1"
   },
   "devDependencies": {
+    "awesome-typescript-loader": "^3.2.3",
+    "cytoscape-view-utilities": "^2.0.6",
     "typedoc": "^0.8.0",
     "typedoc-webpack-plugin": "^1.1.4",
     "webpack": "^3.5.6"

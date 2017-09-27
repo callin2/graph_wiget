@@ -3,19 +3,21 @@ var webpack = require('webpack');
 
 module.exports = {
     entry: {
-        GraphWidget:'./index.js',
-        DemoApp:'./src/DemoApp.ts',
-        Filter:'./src/demo/Filter.ts',
-        FitZoom:'./src/demo/FitZoom.ts',
-        NodeSelect:'./src/demo/NodeSelect.ts'
+        GraphWidget:'./src/GraphWidget.ts'
     },
     output: {
         filename: "[name].js",
         devtoolLineToLine: true,
         sourceMapFilename: "[file].map",
         path: path.resolve(__dirname, 'dist'),
-        pathinfo: true,  // must be removed at production
-        publicPath: "/dist/"
+        // pathinfo: true,  // must be removed at production
+        publicPath: "/dist/",
+
+        libraryTarget: "var",
+        library: "[name]"
+    },
+    externals: {
+        jquery: 'jQuery'
     },
 
     devtool: 'source-map',
