@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Custom Style</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <script
             src="https://code.jquery.com/jquery-3.2.1.min.js"
@@ -11,6 +11,11 @@
     <script src="../dist/GraphWidget.js"></script>
 </head>
 <body>
+<pre class="">
+    cytoscape를 사용하고 있어서 해당 문법을 따릅니다.
+    아래 링크의 문서를 참고하시기 바랍니다.
+</pre>
+<a href="http://js.cytoscape.org/#style">http://js.cytoscape.org/#style</a>
 
 <div id='graph' style="width: 1200px; height: 800px;border: 1px solid black;"></div>
 
@@ -19,29 +24,6 @@
         //console.log('GraphWidget', GraphWidget.GraphWidget)
         var GW = GraphWidget.GraphWidget
         var gw = new GW('#graph')
-
-        gw.afterInitExtension().then(()=>{
-            gw.on('node-expand', (ele)=>{
-                console.log('node-expand', ele, ele.id());
-
-                let fromid = ele.id()
-                // request expand data then add
-                setTimeout(()=>{
-
-                    gw.add([
-                        { group: "nodes", data: { id: fromid + "n0", name:'A'  }  },
-                        { group: "nodes", data: { id: fromid + "n1", name:'B' }  },
-                        { group: "nodes", data: { id: fromid + "n2", name:'C' }  },
-                        { group: "edges", data: { source: fromid, target: fromid+"n0", label:'-->' } },
-                        { group: "edges", data: { source: fromid, target: fromid+"n1", label:'-->' } },
-                        { group: "edges", data: { source: fromid, target: fromid+"n2", label:'-->' } }
-                    ]);
-
-                    gw.doLayout();
-                },100)
-
-            });
-        });
 
 
 
