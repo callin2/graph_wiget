@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zoom UI only</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <script src="../dist/GraphWidget.js"></script>
+    <style>
+        html,body { height: 100%; margin: 0px; padding: 0px; overflow: hidden;}
+    </style>
+</head>
+<body>
+사용가능한 <a href="https://github.com/cytoscape/cytoscape.js-panzoom" target="_blank">option</a> 정보
+<div id='graph' style="width: 100%; height: 100%;"></div>
+<script>
+    window.addEventListener('load', () => {
+        var GW = GraphWidget.GraphWidget;
+        var gw = new GW('#graph', {
+            userZoomingEnabled: false,  ////////////////////////////////////////////////
+            extension : {
+                panzoom: {
+                    minZoom: 0.1, // min zoom level
+                    maxZoom: 3, // max zoom level
+                    fitPadding: 70, // padding when fitting
+                }
+            }
+        });
+
+        // gw.cy.userZoomingEnabled(false);   <-- 이렇게 해도 같음
+
+        gw.afterInitExtension().then(() => {
+            gw.add([
+                {group: "nodes", data: {id: "n0", name: 'key'}, position: {x: 100, y: 100}},
+                {group: "nodes", data: {id: "n1", name: 'value'}, position: {x: 200, y: 200}},
+                {group: "edges", data: {id: "e0", source: "n0", target: "n1", label: 'rel'}}
+            ])
+        });
+    })
+</script>
+</body>
+</html>
