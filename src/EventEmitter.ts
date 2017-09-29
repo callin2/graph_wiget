@@ -13,8 +13,9 @@ export class EventEmitter {
      *
      * @param {string} evtName
      */
-    protected addSupportEvent(evtName: string): void {
-        this.supportEvents[evtName] = true
+    protected addSupportEvent(evtName: string|string[]): void {
+        if(evtName instanceof Array) evtName.forEach(evtnm=>this.addSupportEvent(evtnm));
+        else this.supportEvents[evtName] = true;
     }
 
     /**
@@ -34,7 +35,7 @@ export class EventEmitter {
      */
     on(eventName: string, callback: Callback, ctx: any): void {
         if(!this.checkSupport(eventName)) {
-            console.error(`${eventName}은 지원하지 않는 event 입니다. 제공되는 이벤트는 ${Object.keys(this.supportEvents).join(',')} 입니다.`)
+            console.error(`${eventName}은 지원하지 않는 event 입니다. 제공되는 이벤트는 ${Object.keys(this.supportEvents).join(',')} 입니다.`);
             return
         }
 
