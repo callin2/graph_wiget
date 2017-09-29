@@ -1,16 +1,14 @@
 import * as cytoscape from 'cytoscape';
 
-import * as undoRedo  from 'cytoscape.js-undo-redo/cytoscape-undo-redo.js'
+import * as undoRedo from 'cytoscape.js-undo-redo/cytoscape-undo-redo.js'
 import * as viewUtilities from 'cytoscape-view-utilities'
-import * as cxtmenu   from 'cytoscape-cxtmenu';
+import * as cxtmenu from 'cytoscape-cxtmenu';
 import * as cyqtip from 'cytoscape-qtip';
 import * as panzoom from 'cytoscape-panzoom';
-require('cytoscape-panzoom/cytoscape.js-panzoom.css')
+
+require('cytoscape-panzoom/cytoscape.js-panzoom.css');
 
 import * as euler from 'cytoscape-euler';
-
-// console.log(euler, panzoom)
-
 
 import * as jquery from 'jquery'
 
@@ -452,33 +450,33 @@ var defaultSetting = {
     pixelRatio: 'auto',
     extension: {
         // 'cyqtip' : true,
-        'panzoom' : {
-            zoomFactor: 0.05, // zoom factor per zoom tick
-            zoomDelay: 45, // how many ms between zoom ticks
-            minZoom: 0.1, // min zoom level
-            maxZoom: 10, // max zoom level
-            fitPadding: 50, // padding when fitting
-            panSpeed: 10, // how many ms in between pan ticks
-            panDistance: 10, // max pan distance per tick
-            panDragAreaSize: 75, // the length of the pan drag box in which the vector for panning is calculated (bigger = finer control of pan speed and direction)
-            panMinPercentSpeed: 0.25, // the slowest speed we can pan by (as a percent of panSpeed)
-            panInactiveArea: 8, // radius of inactive area in pan drag box
-            panIndicatorMinOpacity: 0.5, // min opacity of pan indicator (the draggable nib); scales from this to 1.0
-            autodisableForMobile: true, // disable the panzoom completely for mobile (since we don't really need it with gestures like pinch to zoom)
-            // icon class names
-            sliderHandleIcon: 'fa fa-minus',
-            zoomInIcon: 'fa fa-plus',
-            zoomOutIcon: 'fa fa-minus',
-            resetIcon: 'fa fa-expand'
-        },
-        'cxtmenu' : {
-            node: [
+        // 'panzoom': {
+        //     zoomFactor: 0.05, // zoom factor per zoom tick
+        //     zoomDelay: 45, // how many ms between zoom ticks
+        //     minZoom: 0.1, // min zoom level
+        //     maxZoom: 10, // max zoom level
+        //     fitPadding: 50, // padding when fitting
+        //     panSpeed: 10, // how many ms in between pan ticks
+        //     panDistance: 10, // max pan distance per tick
+        //     panDragAreaSize: 75, // the length of the pan drag box in which the vector for panning is calculated (bigger = finer control of pan speed and direction)
+        //     panMinPercentSpeed: 0.25, // the slowest speed we can pan by (as a percent of panSpeed)
+        //     panInactiveArea: 8, // radius of inactive area in pan drag box
+        //     panIndicatorMinOpacity: 0.5, // min opacity of pan indicator (the draggable nib); scales from this to 1.0
+        //     autodisableForMobile: true, // disable the panzoom completely for mobile (since we don't really need it with gestures like pinch to zoom)
+        //     // icon class names
+        //     sliderHandleIcon: 'fa fa-minus',
+        //     zoomInIcon: 'fa fa-plus',
+        //     zoomOutIcon: 'fa fa-minus',
+        //     resetIcon: 'fa fa-expand'
+        // },
+        'cxtmenu': {
+            // node: [
                 // {evtname: 'node-lock', label: 'Lock', select: "handleNodeLock", emit: true},
                 // {evtname: 'node-prop', label: 'Property', select: "handleNodeProp", emit: true},
-                {evtname: 'node-expand', label: 'Expand', select: null, emit: true},
+                // {evtname: 'node-expand', label: 'Expand', select: null, emit: true},
                 // {evtname: 'node-remove', label: 'Remove', select: "handleNodeLock", emit: true},
                 // {evtname: 'node-hide', label: 'Hide', select: "handleNodeLock", emit: false}
-            ],
+            // ],
             // edge: [
             //     {evtname: 'edge-prop', label: 'Property', select: "handleEdgeProp", emit: true},
             //     {evtname: 'edge-remove', label: 'Remove', select: "handleEdgeRemove", emit: true},
@@ -508,12 +506,66 @@ function makeid(): string {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     return text;
 }
+
+/**
+ * 2D or 3D point
+ */
 interface Point {
     x: number
     y: number
+    z?: number
 }
-//----------------------------------------------------------------------------------
-export class GraphWidget extends EventEmitter {
+
+interface VertexData {
+    id: string | number
+    parent?: string | number
+}
+
+/**
+ *
+ */
+interface Vertex {
+    group?: string
+    data: VertexData
+    position?: Point
+    classes?: string
+}
+
+interface EdgeData {
+    id?: string | number
+    source: string | number
+    target: string | number
+}
+
+/**
+ *
+ */
+interface Edge {
+    group?: string
+    data: EdgeData
+    classes?: string
+}
+
+type CyGraphElem = Vertex | Edge
+
+
+/**
+ *
+ */
+export interface IGraphWidget {
+    doLayout: (layoutConfig: any) => void
+    add: (data: CyGraphElem | CyGraphElem[]) => void
+    export: () => void
+    selectAllNodeByLabel: (label: string) => void
+    selectAllEdgeByLabel: (label: string) => void
+}
+
+/**
+ * cytoscape.js 를 wrapping 한 graph widget
+ * @see http://js.cytoscape.org/
+ */
+export class GraphWidget extends EventEmitter implements IGraphWidget {
+    _afterInitFn: { resolve: (value?: any) => void; reject: (reason?: any) => void; };
     cy: any;
     lastMousePosition: Point;
     ext_unre: any = null;
@@ -525,15 +577,15 @@ export class GraphWidget extends EventEmitter {
      *
      * @param {string | HTMLElement} rootElement
      */
-    constructor(rootElement?: string | HTMLElement, protected config? : any ) {
+    constructor(rootElement?: string | HTMLElement, protected config?: any) {
         super()
 
         this.initRoot(rootElement);
 
         this.config = this.config ? this.config : {};
 
-        this.config = Object.assign({},defaultSetting,this.config,{
-            container : this.rootElement,
+        this.config = Object.assign({}, defaultSetting, this.config, {
+            container: this.rootElement,
             ready: (e) => {
                 this.cy = e.cy
                 this.onReady()
@@ -554,42 +606,53 @@ export class GraphWidget extends EventEmitter {
         if (typeof rootElement == 'undefined' || rootElement == null) {
             this.removeElementWhenDestroy = true;
             this.rootElement = document.createElement("div");
-            this.rootElement.style.width =  "800px";
-            this.rootElement.style.height= "600px";
+            this.rootElement.style.width = "800px";
+            this.rootElement.style.height = "600px";
 
             document.querySelector('body').appendChild(this.rootElement)
         }
         if (rootElement != null && typeof rootElement == 'string') {
+            // noinspection TypeScriptUnresolvedFunction
             this.rootElement = <HTMLElement>document.querySelector(rootElement);
         } else if (rootElement != null && rootElement instanceof HTMLElement) {
             this.rootElement = rootElement;
         }
     }
 
-    public loadData(data: any) {
-    }
-
-    public makeLayout(layoutOption: any) {
-    }
-
-    public addNode(name, w, h, color, shape, borderColor, property) {
+    public export(): void {
 
     }
 
-    public updateNode(id, name, w, h, color, shape, borderColor, property) {
+
+    public selectAllNodeByLabel(label: string): void {
 
     }
 
-    public updateEdge() {
+    public selectAllEdgeByLabel(label: string): void {
 
     }
 
-    public add(param) {
-        this.cy.add(param);
+
+    /**
+     * GraphWidget에 vertex 또는 Edge 또는 둘 다 추가한다.
+     * @param elements [string|number]
+     */
+    public add(elements): void {
+        this.cy.add(elements);
     }
 
-    public doLayout() {
-        if(this.layout) this.layout.stop();
+    /**
+     *
+     * @param layoutConfig [optional] 없을경우 default layout 설정으로 layout 을 수행.
+     * 있을경우 default layout 읅 변경후 layout 을 수행
+     */
+    public doLayout(layoutConfig?: any) {
+        if (this.layout) this.layout.stop();
+
+        if (layoutConfig) {
+            this.config.layout = layoutConfig
+        }
+
         this.layout = this.cy.makeLayout(this.config.layout)
         this.layout.run()
     }
@@ -645,27 +708,43 @@ export class GraphWidget extends EventEmitter {
     private initExt_cxtmenu(cxtOption) {
         cxtmenu(cytoscape);
 
-        Object.keys(cxtOption).forEach((k)=>{
+        Object.keys(cxtOption).forEach((k) => {
             this.cy.cxtmenu({
                 selector: k,
                 menuRadius: 80,
                 fillColor: 'rgba(50, 0, 0, 0.65)',
-                commands: cxtOption[k].map((menu)=>({
-                    content: `<span style="display:inline-block; width:20px; font-size:10pt">${menu.label}</span>`,
-                    select: (param)=>{
-                        if(menu.select) {  this[menu.select](param) }
-                        if(menu.emit) { this.fire(menu.evtname, param)}
+                commands: cxtOption[k].map((menu) => {
+                    if(menu.emit) this.addSupportEvent(menu.evtname);
+                    return {
+                        content: `<span style="display:inline-block; width:20px; font-size:10pt">${menu.label}</span>`,
+                        select: (param) => {
+                            if (menu.select) {
+                                this[menu.select](param)
+                            }
+                            if (menu.emit) {
+                                this.fire(menu.evtname, param)
+                            }
+                        }
                     }
-                }))
-
+                })
             })
         });
     }
 
     initExtension() {
-        Object.keys(this.config.extension).forEach((key)=>{
+        Object.keys(this.config.extension).forEach((key) => {
             this['initExt_' + key](this.config.extension[key])
         });
+
+        this._afterInitFn.resolve();
+        this._afterInitFn = null;
+        delete this._afterInitFn
+    }
+
+    afterInitExtension(): Promise<any> {
+        return new Promise((resolve, reject)=>{
+            this._afterInitFn = {resolve, reject}
+        })
     }
 
     onReady() {

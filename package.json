@@ -2,9 +2,11 @@
   "name": "graph_wiget",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/GraphWidget.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "./node_modules/.bin/webpack",
+    "start": "./node_modules/.bin/http-server .",
+    "docs" : "./node_modules/.bin/typedoc --out docs src"
   },
   "repository": {
     "type": "git",
@@ -27,8 +29,10 @@
   },
   "devDependencies": {
     "awesome-typescript-loader": "^3.2.3",
+    "coffeescript": "^2.0.1",
     "css-loader": "^0.28.7",
     "cytoscape-view-utilities": "^2.0.6",
+    "http-server": "^0.10.0",
     "style-loader": "^0.18.2",
     "typedoc": "^0.8.0",
     "typedoc-webpack-plugin": "^1.1.4",

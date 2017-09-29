@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="ext/coffeescript.js"></script>
+    <style>
+        body,html {
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<div style="background-color: #d9d9d9; height:30px">
+    <span style="color:#8e2918; font-weight: bold">예제를 선택하세요!</span>
+    <button onclick="simple()" data-url="test/index.html">simple</button>
+    <button onclick="simple()" data-url="test/custom_style.html">style</button>
+    <button onclick="simple()" data-url="test/zoom_wheel.html">zoom wheel</button>
+    <button onclick="simple()" data-url="test/zoom_ui.html">zoom ui</button>
+    <button onclick="simple()" data-url="test/zoom_ui_only.html">zoom ui only</button>
+</div>
+<iframe id="myFrame" src="" frameborder="0"  style="width:50%;height:calc(100% - 30px)"></iframe>
+<div style="width:50%;height:calc(100% - 30px); float: right;background-color: antiquewhite; overflow: auto">
+    <pre id="srcText"></pre>
+</div>
+
+<script type="text/coffeescript">
+    $ = (selector) -> document.querySelector(selector)
+
+    xhr = (url) ->
+        new Promise((resolve,reject)->
+            request = new XMLHttpRequest();
+            request.open('GET', url, true);
+
+            request.onload = ->
+                if (request.status >= 200 && request.status < 400)
+                    resolve(request.responseText)
+                else reject()
+
+            request.send();
+        )
+
+    window.simple = (evt)->
+        $('#myFrame').setAttribute('src', window.event.target.getAttribute('data-url'))
+        xhr(window.event.target.getAttribute('data-url')).then (resp)->$('#srcText').textContent = resp
+</script>
+</body>
+</html>
