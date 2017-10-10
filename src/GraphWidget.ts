@@ -5,6 +5,7 @@ import * as viewUtilities from 'cytoscape-view-utilities'
 import * as cxtmenu from 'cytoscape-cxtmenu';
 import * as cyqtip from 'cytoscape-qtip';
 import * as panzoom from 'cytoscape-panzoom';
+import * as gexf  from 'gexf'
 
 require('cytoscape-panzoom/cytoscape.js-panzoom.css');
 
@@ -13,6 +14,8 @@ import * as euler from 'cytoscape-euler';
 import * as jquery from 'jquery'
 
 import {EventEmitter} from "./EventEmitter";
+import {GexfDataProvider} from "./data/GexfDataProvider";
+import {Vertex, Edge, CyGraphElem, Point, GraphData} from "./data/GraphTypes";
 
 //----------------------------------------------------------------------------------
 var defaultStyle = [
@@ -507,47 +510,6 @@ function makeid(): string {
     return text;
 }
 
-/**
- * 2D or 3D point
- */
-interface Point {
-    x: number
-    y: number
-    z?: number
-}
-
-interface VertexData {
-    id: string | number
-    parent?: string | number
-}
-
-/**
- *
- */
-interface Vertex {
-    group?: string
-    data: VertexData
-    position?: Point
-    classes?: string
-}
-
-interface EdgeData {
-    id?: string | number
-    source: string | number
-    target: string | number
-}
-
-/**
- *
- */
-interface Edge {
-    group?: string
-    data: EdgeData
-    classes?: string
-}
-
-type CyGraphElem = Vertex | Edge
-
 
 /**
  *
@@ -657,12 +619,14 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     /**
      *
      * @param layoutConfig [optional] 없을경우 default layout 설정으로 layout 을 수행.
-     * 있을경우 default layout 읅 변경후 layout 을 수행
+     * 있을경우 default layout 을 변경후 layout 을 수행. string 인 경우 preset 에서 설정을 가져옴
      */
-    public doLayout(layoutConfig?: any) {
+    public doLayout(layoutConfig?: string | any) {
         if (this.layout) this.layout.stop();
 
-        if (layoutConfig) {
+        if(typeof layoutConfig == 'string') {
+            this.config.layout = layoutPreset[layoutConfig]
+        }else if (layoutConfig) {
             this.config.layout = layoutConfig
         }
 
@@ -788,5 +752,28 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
 
         // 화면에 맞게 elements 정렬
         this.cy.fit(this.cy.elements(), 50); // fit to all the layouts
+    }
+
+    public clear() {
+        this.cy.remove('edge')
+        this.cy.remove('node')
+    }
+
+    public loadGexf(fileUrl: string) {
+        this.clear();
+
+        var prv = new GexfDataProvider();
+        prv.configure(fileUrl);
+        prv.load({onVertex:(vl:Array<Vertex>)=>{
+            vl.forEach((v)=>{
+                this.cy.add(v)
+            })
+        }, onEdge:(el:Edge[])=>{
+            el.forEach((e)=>{
+                this.cy.add(e)
+            })
+        }, onEnd: (gd: GraphData)=>{
+
+        }})
     }
 }

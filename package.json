@@ -6,7 +6,7 @@
   "scripts": {
     "build": "./node_modules/.bin/webpack",
     "start": "./node_modules/.bin/http-server .",
-    "docs" : "./node_modules/.bin/typedoc --out docs src"
+    "docs": "./node_modules/.bin/typedoc --out docs src"
   },
   "repository": {
     "type": "git",
@@ -25,6 +25,7 @@
     "cytoscape-panzoom": "^2.5.2",
     "cytoscape-qtip": "^2.7.1",
     "cytoscape.js-undo-redo": "^1.0.1",
+    "gexf": "^0.2.5",
     "jquery": "^3.2.1"
   },
   "devDependencies": {

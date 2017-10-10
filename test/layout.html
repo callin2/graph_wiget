@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Layout</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <script src="../dist/GraphWidget.js"></script>
+    <style>
+        html,body { height: 100%; margin: 0px; padding: 0px; overflow: hidden;}
+    </style>
+</head>
+<body>
+<div id="btnGroup">
+    <button data-layout="euler">euler</button>
+    <button data-layout="grid">grid</button>
+    <button data-layout="random">random</button>
+    <button data-layout="breadthfirst">breadthfirst</button>
+    <button data-layout="circle">circle</button>
+    <button data-layout="concentric">concentric</button>
+    <button data-layout="cose">cose</button>
+</div>
+<div id='graph' style="width: 100%; height: 100%;"></div>
+<script>
+    $(()=>{
+        var GW = GraphWidget.GraphWidget;
+        var gw = new GW('#graph',{extension : {panzoom: {} }});
+
+        gw.afterInitExtension().then(() => {
+            gw.loadGexf('/data/dh11.gexf')
+        });
+
+        $('#btnGroup').on('click','button',(evt)=>{
+            console.log(  evt.target, $(evt.target).data('layout'))
+
+            gw.doLayout($(evt.target).data('layout'))
+        })
+
+    });
+</script>
+</body>
+</html>
