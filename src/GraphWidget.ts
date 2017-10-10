@@ -533,7 +533,8 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     ext_unre: any = null;
     rootElement: HTMLElement;
     removeElementWhenDestroy: boolean;
-    layout: any
+    layout: any;
+    neighborDepth: number;
 
     /**
      *
@@ -542,7 +543,7 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     constructor(rootElement?: string | HTMLElement, protected config?: any) {
         super()
 
-        this.addSupportEvent(['click']);
+        this.addSupportEvent(['click','layoutstop']);
 
         this.initRoot(rootElement);
 
@@ -622,7 +623,7 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
      * 있을경우 default layout 을 변경후 layout 을 수행. string 인 경우 preset 에서 설정을 가져옴
      */
     public doLayout(layoutConfig?: string | any) {
-        if (this.layout) this.layout.stop();
+        //if (this.layout) this.layout.stop();
 
         if(typeof layoutConfig == 'string') {
             this.config.layout = layoutPreset[layoutConfig]
@@ -725,9 +726,61 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
             if(evt.target.isNode) this.fire('click', evt)
         });
 
-        this.cy.on('cxttapstart', function (e) {
+        this.cy.on('click','node', (evt)=>{
+            this.nodeClickHandler(evt)
+        });
+
+        this.cy.on('cxttapstart',e => {
             this.lastMousePosition = e.position;
         });
+
+        this.cy.on('layoutstop', evt => {
+            console.log('layoutstop')
+            this.fire('layoutstop', evt)
+        })
+    }
+
+    private nodeClickHandler(evt: any) {
+        console.log(evt)
+        let targetNode = evt.target[0]
+        let isAlreadySelected = evt.target[0].selected()
+
+        console.log(targetNode,isAlreadySelected)
+
+        if(!isAlreadySelected) {
+            setTimeout(()=>{
+                this.neighborDepth = 1;
+                this.cy.scratch('selElems', this.cy.$(':selected'))
+                this.fire('nodeSelected', evt.target[0])
+            });
+
+            return;
+        }
+
+        console.log(this.neighborDepth)
+
+        setTimeout(()=>{
+            this.neighborDepth++
+
+            var d1Col = this.cy.scratch('selElems');
+
+            console.log(d1Col.size())
+
+            var d2Col= d1Col.union(d1Col.neighborhood());
+            d2Col.select()
+
+            console.log(d2Col.size())
+
+            this.cy.scratch('selElems', d2Col)
+
+            this.cy.animation({
+                fit: {
+                    eles: d2Col,
+                    padding: 200
+                },
+                duration: 500
+            }).play()
+        },0)
     }
 
     afterInitExtension(): Promise<any> {
