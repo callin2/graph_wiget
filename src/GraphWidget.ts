@@ -580,6 +580,8 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     constructor(rootElement?: string | HTMLElement, protected config?: any) {
         super()
 
+        this.addSupportEvent(['click']);
+
         this.initRoot(rootElement);
 
         this.config = this.config ? this.config : {};
@@ -587,12 +589,12 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         this.config = Object.assign({}, defaultSetting, this.config, {
             container: this.rootElement,
             ready: (e) => {
-                this.cy = e.cy
+                this.cy = e.cy;
                 this.onReady()
             }
         });
 
-        this.initExtLayout_euler()
+        this.initExtLayout_euler();
         this.cy = cytoscape(this.config)
     }
 
@@ -619,8 +621,19 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         }
     }
 
-    public export(): void {
-
+    public export(type='png'): void {
+        switch(type) {
+            case 'png': {
+                let aTag = document.createElement('a');
+                aTag.setAttribute('href', this.cy.png());
+                aTag.setAttribute('download', '');
+                document.getElementsByTagName('body')[0].appendChild(aTag);
+                let evt = document.createEvent('mouseevent');
+                evt.initEvent('click',true,true);
+                aTag.dispatchEvent(evt);
+                aTag.remove();
+            }
+        }
     }
 
 
@@ -741,6 +754,18 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         delete this._afterInitFn
     }
 
+    initEvent() {
+        this.cy.on('click',evt=>{
+            this.lastMousePosition = evt.position;
+            // node 또는 edge 에서 발생한 click event 만 전파시킨다.
+            if(evt.target.isNode) this.fire('click', evt)
+        });
+
+        this.cy.on('cxttapstart', function (e) {
+            this.lastMousePosition = e.position;
+        });
+    }
+
     afterInitExtension(): Promise<any> {
         return new Promise((resolve, reject)=>{
             this._afterInitFn = {resolve, reject}
@@ -748,7 +773,8 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     }
 
     onReady() {
-        this.initExtension()
+        this.initExtension();
+        this.initEvent();
 
         this.layout = this.cy.makeLayout(this.config.layout)
         this.layout.run()
@@ -757,27 +783,8 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         // ==  cy events 등록
         // ==========================================
 
-        this.cy.on('tap', function (e) {
-            console.log(e)
-            // if (e.cyTarget === this.cy) {
-            //     this.api.view.removeHighlights();
-            //     this.cy.$(':selected').unselect();
-            //     this.graph.pivotNode = null;
-            // }
 
-            this.lastMousePosition = e.position;
-        });
 
-        this.cy.on('tap', 'node', function (e) {
-            console.log(e)
-            // this.graph.pivotNode = e.cyTarget;
-            // this.api.view.removeHighlights();
-            // this.api.view.highlightNeighbors(e.cyTarget);
-        });
-
-        this.cy.on('cxttapstart', function (e) {
-            this.lastMousePosition = e.position;
-        });
 
         // 화면에 맞게 elements 정렬
         this.cy.fit(this.cy.elements(), 50); // fit to all the layouts
