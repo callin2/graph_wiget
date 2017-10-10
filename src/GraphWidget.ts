@@ -549,7 +549,7 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
 
         this.config = this.config ? this.config : {};
 
-        this.config = Object.assign({}, defaultSetting, this.config, {
+        this.config = Object.assign({}, this.config, defaultSetting, {
             container: this.rootElement,
             ready: (e) => {
                 this.cy = e.cy;
@@ -796,13 +796,6 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         this.layout = this.cy.makeLayout(this.config.layout)
         this.layout.run()
 
-        // ==========================================
-        // ==  cy events 등록
-        // ==========================================
-
-
-
-
         // 화면에 맞게 elements 정렬
         this.cy.fit(this.cy.elements(), 50); // fit to all the layouts
     }
@@ -812,21 +805,32 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         this.cy.remove('node')
     }
 
-    public loadGexf(fileUrl: string) {
+    public selectByAttr(attrName:string, attrValue:string) {
+        this.cy.$('node, edge').unselect()
+        this.cy.$(`node[${attrName}="${attrValue}"]`).select()
+    }
+
+    public loadGexf(fileUrl: string, mapper? : any):Promise<any> {
         this.clear();
 
-        var prv = new GexfDataProvider();
-        prv.configure(fileUrl);
-        prv.load({onVertex:(vl:Array<Vertex>)=>{
-            vl.forEach((v)=>{
-                this.cy.add(v)
-            })
-        }, onEdge:(el:Edge[])=>{
-            el.forEach((e)=>{
-                this.cy.add(e)
-            })
-        }, onEnd: (gd: GraphData)=>{
-
-        }})
+        return new Promise((resolve,reject)=>{
+            var prv = new GexfDataProvider();
+            prv.configure(fileUrl);
+            prv.load({
+                onVertex:(vl:Array<Vertex>)=>{
+                    vl.forEach((v)=>{
+                        this.cy.add(v)
+                    })
+                },
+                onEdge:(el:Edge[])=>{
+                    el.forEach((e)=>{
+                        this.cy.add(e)
+                    })
+                },
+                onEnd:(gd: GraphData) =>{
+                    resolve(gd)
+                }
+            }, mapper)
+        })
     }
 }
