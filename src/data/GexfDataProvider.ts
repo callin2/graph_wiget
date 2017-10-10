@@ -12,6 +12,17 @@ function isGexfConf(obj: any): obj is GexfConf {
   return (<GexfConf>obj).url !== undefined
 }
 
+
+var defaultMapper = {
+    node: {
+        data: (n)=>({id:n.id}),
+        position: (n)=>n.viz.position,
+    },
+    edge:{
+        data: e=>({source: e.source, target: e.target})
+    }
+};
+
 export class GexfDataProvider extends StaticGraphDataProvider {
   protected config: GexfConf
   protected worker: Worker
@@ -20,7 +31,19 @@ export class GexfDataProvider extends StaticGraphDataProvider {
     throw new Error("Method not implemented.");
   }
 
-  load(callbackObj: { onVertex: (vl: Array<Vertex>) => void; onEdge: (el: Array<Edge>) => void; onEnd?: (gd: GraphData)=>void; }): void {
+  /**
+   *
+   * @param {{onVertex: ((vl: Array<Vertex>) => void); onEdge: ((el: Array<Edge>) => void); onEnd?: ((gd: GraphData) => void)}} callbackObj
+   * @param mapper
+   */
+  load(
+    callbackObj: {
+      onVertex: (vl: Array<Vertex>) => void;
+      onEdge: (el: Array<Edge>) => void;
+      onEnd?: (gd: GraphData)=>void;
+    },
+    mapper:any = defaultMapper
+  ): void {
     var buf;
     var p =fetch(this.config.url).then((res)=>res.text());
 
@@ -28,16 +51,16 @@ export class GexfDataProvider extends StaticGraphDataProvider {
       var graph = gexf.parse(gexfText);
       graph.nodes.forEach((n) => {
         callbackObj.onVertex([{
-          data : {id: 'n' + n.id},
-          position: n.viz.position
+          data : (mapper.node && mapper.node.data) ? mapper.node.data(n) : defaultMapper.node.data(n),
+          position : (mapper.node && mapper.node.position) ? mapper.node.position(n) : defaultMapper.node.position(n)
         }]);
       });
 
       graph.edges.forEach((e) => {
         callbackObj.onEdge([{
           data: {
-              source: 'n' + e.source,
-              target: 'n' + e.target
+              source: e.source,
+              target: e.target
           },
         }]);
       });

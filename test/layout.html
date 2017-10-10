@@ -15,6 +15,7 @@
 </head>
 <body>
 <div id="btnGroup">
+    <span><b>Layout: </b></span>
     <button data-layout="euler">euler</button>
     <button data-layout="grid">grid</button>
     <button data-layout="random">random</button>
@@ -23,20 +24,227 @@
     <button data-layout="concentric">concentric</button>
     <button data-layout="cose">cose</button>
 </div>
+<div id="label">
+    <span><b>Label: </b></span>
+</div>
 <div id='graph' style="width: 100%; height: 100%;"></div>
+
 <script>
     $(()=>{
         var GW = GraphWidget.GraphWidget;
-        var gw = new GW('#graph',{extension : {panzoom: {} }});
+        var gw = new GW('#graph',{
+            extension : {panzoom: {} },
+            style: [
+                {
+                    selector: 'core',
+                    css: {
+                        "selection-box-color": "#11bf1c",
+                        "selection-box-opacity": 0.25,
+                        "selection-box-border-color": "#aaa",
+                        "selection-box-border-width": 1,
+                        // "panning-cursor": "grabbing",
+                    }
+                }, {
+                    selector: 'node',
+                    css: {
+                        'label': 'data(name)',
+                        'text-halign': 'center',    // text-halign: left, center, right
+                        'text-valign': 'center',       // text-valign: top, center, bottom
+                        'color': 'white',
+                        'font-weight': 700,
+                        'text-opacity': 1,
+                        'text-outline-width': 2,
+                        'text-outline-color': '#1abde8',
+                        'background-color': '#1abde8',
+                        // 'shape': 'eclipse',
+                        'width': '30px',
+                        'height': '30px',
+                        'border-width': '2',
+                        'border-color': 'white'
+                    }
+                }, {
+                    selector: 'node:parent',
+                    css: {
+                        'label': 'data(name)',
+                        'text-valign': 'bottom',
+                        'color': 'white',
+                        'text-outline-width': 1,
+                        'text-outline-color': '#888',
+                        'border-width': 0,
+                        'border-color': 'white'
+                    }
+                }, {
+                    selector: 'node:locked',
+                    css: {
+                        'background-color': '#444444',
+                        'text-outline-color': '#444444',
+                        'border-color': 'white',
+                        'border-width': 3,
+                        'opacity': 1
+                    }
+                }, {
+                    selector: 'node.expand',                /// 기존과 다른 엣지버전의 변화
+                    css: {
+                        'text-valign': 'center',               // text-valign: top, center, bottom
+                        'text-halign': 'center',                // text-halign: left, center, right
+                        'font-size': '4',
+                        'opacity': 0.6,
+                        'color': 'black',
+                        'text-outline-width': 0,
+                        'text-opacity': 0.8,
+                        'line-color': 'yellow',
+                        'background-color': 'yellow',
+                        'border-width': 1,
+                        'width': '50px',
+                        'height': '50px',
+                        // 'shape': 'eclipse',
+                        'border-color': 'white'
+                    }
+                }, {
+                    selector: ':selected',                /// 선택한 노드의 변화 (.highlighted로 인해 선택된 노드를 강조하고자 하려면 border값으로 변화를 줘야함)
+                    css: {
+                        'background-color': 'white',
+                        'text-outline-color': '#3f51b5',
+                        'text-outline-width': 2,
+                        'target-arrow-color': 'black',
+                        'source-arrow-color': 'black',
+                        'line-color': '#3f51b5',
+                        'border-style': 'double',
+                        'border-color': '#3f51b5',
+                        'border-width': 10,
+                    }
+                }, {
+                    selector: 'edge',
+                    css: {
+                        'label': 'data(label)',
+                        'color': '#1abde8',
+                        'opacity': 1,
+                        'text-outline-width': 2,
+                        'text-outline-color': 'white',
+                        'line-color': '#1abde8',
+                        'line-style': 'solid',            // line-style: solid, dotted, dashed
+                        'width': 2,
+                        'curve-style': 'bezier',
+                        'target-arrow-shape': 'triangle',
+                        'target-arrow-color': '#1abde8',
+                        'source-arrow-shape': 'none',
+                        'source-arrow-color': '#1abde8',
+                        'font-size': 12
+                    }
+                }, {
+                    selector: 'edge:selected',             /// 엣지만 클릭했을 경우 변화
+                    css: {
+                        // 'background-color': '#3f51b5',
+                        'target-arrow-color': '#3f51b5',
+                        'source-arrow-color': '#3f51b5',
+                        'line-color': '#3f51b5',
+                        'width': 3,
+                        'opacity': 1,
+                        'color': '#3f51b5',
+                        'text-outline-width': 2,
+                        'text-outline-color': 'white',
+                    }
+                }, {
+                    selector: 'edge:locked',              /// 엣지를 잠궜을 때 변화
+                    css: {
+                        // 'width': 4,
+                        'opacity': 1,
+                        'line-color': 'red',
+                        'target-arrow-color': 'red',
+                        'source-arrow-color': 'red'
+                    }
+                }, {
+                    selector: 'edge.expand',             /// 기존과 다른 엣지버전의 변화
+                    css: {
+                        // 'width': 3,
+                        'opacity': 0.3,
+                        'font-size': '4',
+                        'color': 'yellow',
+                        'line-color': 'yellow',
+                        'target-arrow-color': 'yellow',
+                        'source-arrow-color': 'yellow',
+                    }
+                }, {
+                    selector: '.highlighted',      // 노드 클릭시 노드 및 엣지 변화(연결된 노드도 같이 변화됨)
+                    css: {
+                        'background-color': '#3f51b5',
+                        'line-color': '#3f51b5',
+                        'text-outline-width': 2,
+                        'text-outline-color': '#3f51b5',
+                        'target-arrow-color': '#3f51b5',
+                        'transition-property': 'background-color, line-color, target-arrow-color',
+                        'transition-duration': '0.2s',
+                        'color': 'white'
+                    }
+                }, {
+                    selector: 'edge.highlighted',
+                    'width': 3,
+                    'target-arrow-color': '#3f51b5',
+                    'source-arrow-color': '#3f51b5',
+                    css: {}
+                }, {
+                    selector: '.traveled',
+                    css: {
+                        'background-color': '#11bf1c',
+                        'line-color': '#11bf1c',
+                        'target-arrow-color': 'black',
+                        'transition-property': 'background-color, line-color, target-arrow-color',
+                        'transition-duration': '0.2s'
+                    }
+                }, {
+                    selector: '.edgehandles-hover',   /// 엣지 드래그한 후 선택한 노드의 변화
+                    css: {
+                        'background-color': '#d80001'
+                    }
+                }, {
+                    selector: '.edgehandles-source',    /// 선택된 노드의 드래그시 변화
+                    css: {
+                        'border-width': 10,
+                        'border-color': '#d80001',
+                        'background-color': '#d80001',
+                        'text-outline-color': '#d80001',
+                    }
+                }, {
+                    selector: '.edgehandles-target',   /// 엣지연결할 타겟의 노드변화
+                    css: {
+                        'border-width': 2,
+                        'border-color': 'white',
+                        'text-outline-color': '#d80001',
+                    }
+                }, {
+                    selector: '.edgehandles-preview, .edgehandles-ghost-edge', /// 선택된 노드에 연결될 엣지의 예상변화
+                    css: {
+                        'line-color': '#d80001',
+                        'target-arrow-color': '#d80001',
+                        'source-arrow-color': '#d80001',
+                    }
+                }
+            ]
+        });
 
         gw.afterInitExtension().then(() => {
-            gw.loadGexf('/data/dh11.gexf')
+            let allNodeType = {};
+            gw.loadGexf('/data/dh11.gexf',{node: {data:(n)=>{
+//                console.log(JSON.stringify(n))
+                allNodeType[n.attributes.type] = true
+                return {id: n.id, name: n.label, type: n.attributes.type}
+            }}}).then(()=>{
+                console.log(JSON.stringify(allNodeType))
+
+                Object.keys(allNodeType).forEach((k)=>{
+                    $('#label').append(`<button data-label="${k}">${k}</button>`)
+                })
+            });
+
+
         });
 
         $('#btnGroup').on('click','button',(evt)=>{
-//            console.log(  evt.target, $(evt.target).data('layout'))
-
             gw.doLayout($(evt.target).data('layout'))
+        })
+
+        $('#label').on('click','button',(evt)=>{
+            gw.selectByAttr("type",$(evt.target).data('label'))
         })
 
     });
