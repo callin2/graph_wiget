@@ -621,8 +621,19 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         }
     }
 
-    public export(): void {
-
+    public export(type='png'): void {
+        switch(type) {
+            case 'png': {
+                let aTag = document.createElement('a');
+                aTag.setAttribute('href', this.cy.png());
+                aTag.setAttribute('download', '');
+                document.getElementsByTagName('body')[0].appendChild(aTag);
+                let evt = document.createEvent('mouseevent');
+                evt.initEvent('click',true,true);
+                aTag.dispatchEvent(evt);
+                aTag.remove();
+            }
+        }
     }
 
 
