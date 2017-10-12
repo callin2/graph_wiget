@@ -13,6 +13,8 @@ import * as euler from 'cytoscape-euler';
 import * as jquery from 'jquery'
 
 import {EventEmitter} from "./EventEmitter";
+import {GexfDataProvider} from "./data/GexfDataProvider";
+import {Vertex, Edge, CyGraphElem, Point, GraphData} from "./data/GraphTypes";
 
 //----------------------------------------------------------------------------------
 var defaultStyle = [
@@ -507,47 +509,6 @@ function makeid(): string {
     return text;
 }
 
-/**
- * 2D or 3D point
- */
-interface Point {
-    x: number
-    y: number
-    z?: number
-}
-
-interface VertexData {
-    id: string | number
-    parent?: string | number
-}
-
-/**
- *
- */
-interface Vertex {
-    group?: string
-    data: VertexData
-    position?: Point
-    classes?: string
-}
-
-interface EdgeData {
-    id?: string | number
-    source: string | number
-    target: string | number
-}
-
-/**
- *
- */
-interface Edge {
-    group?: string
-    data: EdgeData
-    classes?: string
-}
-
-type CyGraphElem = Vertex | Edge
-
 
 /**
  *
@@ -571,7 +532,8 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     ext_unre: any = null;
     rootElement: HTMLElement;
     removeElementWhenDestroy: boolean;
-    layout: any
+    layout: any;
+    neighborDepth: number;
 
     /**
      *
@@ -580,13 +542,13 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     constructor(rootElement?: string | HTMLElement, protected config?: any) {
         super()
 
-        this.addSupportEvent(['click']);
+        this.addSupportEvent(['click','layoutstop']);
 
         this.initRoot(rootElement);
 
         this.config = this.config ? this.config : {};
 
-        this.config = Object.assign({}, defaultSetting, this.config, {
+        this.config = Object.assign({}, defaultSetting, this.config,  {
             container: this.rootElement,
             ready: (e) => {
                 this.cy = e.cy;
@@ -621,8 +583,19 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         }
     }
 
-    public export(): void {
-
+    public export(type='png'): void {
+        switch(type) {
+            case 'png': {
+                let aTag = document.createElement('a');
+                aTag.setAttribute('href', this.cy.png());
+                aTag.setAttribute('download', '');
+                document.getElementsByTagName('body')[0].appendChild(aTag);
+                let evt = document.createEvent('mouseevent');
+                evt.initEvent('click',true,true);
+                aTag.dispatchEvent(evt);
+                aTag.remove();
+            }
+        }
     }
 
 
@@ -646,12 +619,14 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     /**
      *
      * @param layoutConfig [optional] 없을경우 default layout 설정으로 layout 을 수행.
-     * 있을경우 default layout 읅 변경후 layout 을 수행
+     * 있을경우 default layout 을 변경후 layout 을 수행. string 인 경우 preset 에서 설정을 가져옴
      */
-    public doLayout(layoutConfig?: any) {
-        if (this.layout) this.layout.stop();
+    public doLayout(layoutConfig?: string | any) {
+        //if (this.layout) this.layout.stop();
 
-        if (layoutConfig) {
+        if(typeof layoutConfig == 'string') {
+            this.config.layout = layoutPreset[layoutConfig]
+        }else if (layoutConfig) {
             this.config.layout = layoutConfig
         }
 
@@ -734,7 +709,10 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     }
 
     initExtension() {
+        console.log('initExtension', this.config.extension)
+
         Object.keys(this.config.extension).forEach((key) => {
+            console.log(key, this.config.extension[key])
             this['initExt_' + key](this.config.extension[key])
         });
 
@@ -750,9 +728,61 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
             if(evt.target.isNode) this.fire('click', evt)
         });
 
-        this.cy.on('cxttapstart', function (e) {
+        this.cy.on('click','node', (evt)=>{
+            this.nodeClickHandler(evt)
+        });
+
+        this.cy.on('cxttapstart',e => {
             this.lastMousePosition = e.position;
         });
+
+        this.cy.on('layoutstop', evt => {
+            console.log('layoutstop')
+            this.fire('layoutstop', evt)
+        })
+    }
+
+    private nodeClickHandler(evt: any) {
+        console.log(evt)
+        let targetNode = evt.target[0]
+        let isAlreadySelected = evt.target[0].selected()
+
+        console.log(targetNode,isAlreadySelected)
+
+        if(!isAlreadySelected) {
+            setTimeout(()=>{
+                this.neighborDepth = 1;
+                this.cy.scratch('selElems', this.cy.$(':selected'))
+                this.fire('nodeSelected', evt.target[0])
+            });
+
+            return;
+        }
+
+        console.log(this.neighborDepth)
+
+        setTimeout(()=>{
+            this.neighborDepth++
+
+            var d1Col = this.cy.scratch('selElems');
+
+            console.log(d1Col.size())
+
+            var d2Col= d1Col.union(d1Col.neighborhood());
+            d2Col.select()
+
+            console.log(d2Col.size())
+
+            this.cy.scratch('selElems', d2Col)
+
+            this.cy.animation({
+                fit: {
+                    eles: d2Col,
+                    padding: 200
+                },
+                duration: 500
+            }).play()
+        },0)
     }
 
     afterInitExtension(): Promise<any> {
@@ -768,14 +798,41 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         this.layout = this.cy.makeLayout(this.config.layout)
         this.layout.run()
 
-        // ==========================================
-        // ==  cy events 등록
-        // ==========================================
-
-
-
-
         // 화면에 맞게 elements 정렬
         this.cy.fit(this.cy.elements(), 50); // fit to all the layouts
+    }
+
+    public clear() {
+        this.cy.remove('edge')
+        this.cy.remove('node')
+    }
+
+    public selectByAttr(attrName:string, attrValue:string) {
+        this.cy.$('node, edge').unselect()
+        this.cy.$(`node[${attrName}="${attrValue}"]`).select()
+    }
+
+    public loadGexf(fileUrl: string, mapper? : any):Promise<any> {
+        this.clear();
+
+        return new Promise((resolve,reject)=>{
+            var prv = new GexfDataProvider();
+            prv.configure(fileUrl);
+            prv.load({
+                onVertex:(vl:Array<Vertex>)=>{
+                    vl.forEach((v)=>{
+                        this.cy.add(v)
+                    })
+                },
+                onEdge:(el:Edge[])=>{
+                    el.forEach((e)=>{
+                        this.cy.add(e)
+                    })
+                },
+                onEnd:(gd: GraphData) =>{
+                    resolve(gd)
+                }
+            }, mapper)
+        })
     }
 }
