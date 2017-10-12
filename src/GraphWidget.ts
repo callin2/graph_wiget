@@ -5,7 +5,6 @@ import * as viewUtilities from 'cytoscape-view-utilities'
 import * as cxtmenu from 'cytoscape-cxtmenu';
 import * as cyqtip from 'cytoscape-qtip';
 import * as panzoom from 'cytoscape-panzoom';
-import * as gexf  from 'gexf'
 
 require('cytoscape-panzoom/cytoscape.js-panzoom.css');
 
@@ -549,7 +548,7 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
 
         this.config = this.config ? this.config : {};
 
-        this.config = Object.assign({}, this.config, defaultSetting, {
+        this.config = Object.assign({}, defaultSetting, this.config,  {
             container: this.rootElement,
             ready: (e) => {
                 this.cy = e.cy;
@@ -710,7 +709,10 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     }
 
     initExtension() {
+        console.log('initExtension', this.config.extension)
+
         Object.keys(this.config.extension).forEach((key) => {
+            console.log(key, this.config.extension[key])
             this['initExt_' + key](this.config.extension[key])
         });
 
