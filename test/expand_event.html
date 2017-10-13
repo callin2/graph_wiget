@@ -17,10 +17,23 @@
 <script>
     window.addEventListener('load', () => {
         //console.log('GraphWidget', GraphWidget.GraphWidget)
-        var GW = GraphWidget.GraphWidget
-        var gw = new GW('#graph')
+        var GW = GraphWidget.GraphWidget;
+
+        // 'cxtmenu' extension을 사용한다.
+        // node 에 'Expand'라는 이름의 context menu를 추가 하고 click 했을때 'node-expand' 이벤트가 발생하도록 한다.
+        // evtName은 아래 'on' method로 이벤트 핸들러를 등록할때 사용한다.
+        var gw = new GW('#graph',{
+            extension:{
+                cxtmenu: {
+                    node: [
+                        {evtname: 'node-expand', label: 'Expand', select: null, emit: true}
+                    ]
+                }
+            }
+        })
 
         gw.afterInitExtension().then(() => {
+            // 이벤트
             gw.on('node-expand', (ele) => {
                 console.log('node-expand', ele, ele.id());
 
