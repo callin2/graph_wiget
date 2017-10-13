@@ -224,7 +224,7 @@
 
         gw.afterInitExtension().then(() => {
             let allNodeType = {};
-            gw.loadGexf('/data/dh11.gexf',{node: {data:(n)=>{
+            gw.loadGexf('../data/dh11.gexf',{node: {data:(n)=>{
 //                console.log(JSON.stringify(n))
                 allNodeType[n.attributes.type] = true
                 return {id: n.id, name: n.label, type: n.attributes.type}
