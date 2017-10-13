@@ -716,7 +716,7 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
             this['initExt_' + key](this.config.extension[key])
         });
 
-        this._afterInitFn.resolve();
+        if(this._afterInitFn) this._afterInitFn.resolve();
         this._afterInitFn = null;
         delete this._afterInitFn
     }
