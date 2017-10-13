@@ -23,7 +23,58 @@
     window.addEventListener('load', ()=>{
         //console.log('GraphWidget', GraphWidget.GraphWidget)
         var GW = GraphWidget.GraphWidget
-        var gw = new GW('#graph')
+        var gw = new GW('#graph', {
+            extension: {panzoom: {}},
+            style: [
+                {
+                    selector: 'node',
+                    css: {
+                        'label': 'data(name)',
+                        'text-halign': 'center',
+                        'text-valign': 'center',
+                        'color': 'white',
+                        'font-weight': 700,
+                        'text-opacity': 1,
+                        'text-outline-width': 2,
+                        'text-outline-color': '#ff0000',
+                        'background-color': '#1abde8',
+                        // 'shape': 'eclipse',
+                        'width': '50px',
+                        'height': '50px',
+                        'border-width': '2',
+                        'border-color': 'white'
+                    }
+                },
+                {
+                    selector: 'node:selected',
+                    css: {
+                        'background-color': '#1aada8',
+                        'border-color': 'black',
+                        'width': '60px',
+                        'height': '60px'
+                    }
+                },
+                {
+                    selector: 'edge',
+                    css: {
+                        'label': 'data(label)',
+                        'color': '#1abde8',
+                        'opacity': 1,
+                        'text-outline-width': 2,
+                        'text-outline-color': 'white',
+                        'line-color': '#770033',
+                        'line-style': 'solid',
+                        'width': 2,
+                        'curve-style': 'bezier',
+                        'target-arrow-shape': 'triangle',
+                        'target-arrow-color': '#1abde8',
+                        'source-arrow-shape': 'none',
+                        'source-arrow-color': '#1abde8',
+                        'font-size': 12
+                    }
+                }
+            ]
+        })
 
 
 
