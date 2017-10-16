@@ -524,6 +524,7 @@ export interface IGraphWidget {
 /**
  * cytoscape.js 를 wrapping 한 graph widget
  * @see http://js.cytoscape.org/
+ *
  */
 export class GraphWidget extends EventEmitter implements IGraphWidget {
     _afterInitFn: { resolve: (value?: any) => void; reject: (reason?: any) => void; };
