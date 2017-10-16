@@ -14,7 +14,9 @@
 1. `npm start`
 
 # document
+0. install chrome extension https://github.com/callin2/pegmatite
 1. `npm run docs`
+2. browse documentation in chrome browser
 
 
 # uml test

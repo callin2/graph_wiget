@@ -418,7 +418,6 @@ var layoutPreset = {
 };
 
 var defaultSetting = {
-    // container: document.getElementById('agens-graph'),
     container: null,
     style: defaultStyle,
     elements: {nodes: [], edges: []},   // agens.graph.demoData[0],
@@ -509,7 +508,6 @@ function makeid(): string {
     return text;
 }
 
-
 /**
  *
  */
@@ -527,6 +525,9 @@ export interface IGraphWidget {
  *
  */
 export class GraphWidget extends EventEmitter implements IGraphWidget {
+    /**
+     *
+     */
     _afterInitFn: { resolve: (value?: any) => void; reject: (reason?: any) => void; };
     cy: any;
     lastMousePosition: Point;
