@@ -17,6 +17,16 @@
 </pre>
 <a href="http://js.cytoscape.org/#style">http://js.cytoscape.org/#style</a>
 
+<div class="highlight highlight-source-uml"><pre>@startuml
+[*] <span class="pl-k">--</span>&gt; State1
+State1 <span class="pl-k">--</span>&gt; [*]
+State1 : this is a string
+State1 : this is another string
+
+State1 <span class="pl-k">-&gt;</span> State2
+State2 <span class="pl-k">--</span>&gt; [*]
+@enduml</pre></div>
+
 <div id='graph' style="width: 1200px; height: 800px;border: 1px solid black;"></div>
 
 <script>
