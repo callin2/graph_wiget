@@ -2,9 +2,85 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>$Title$</title>
+    <title>operation history test</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <script src="../dist/GraphWidget.js"></script>
+    <script src="../node_modules/blockly/blockly_compressed.js"></script>
+    <script src="../node_modules/blockly/blocks_compressed.js"></script>
+    <script src="../node_modules/blockly/msg/js/en.js"></script>
+    <style>
+        html,body { height: 100%; margin: 0px; padding: 0px; overflow: hidden;}
+    </style>
 </head>
 <body>
-$END$
+<div id="blocklyArea" style="width: 50%; height: 100%;float:left;"></div>
+<div id='graph' style="width: 50%; height: 100%; float:right;"></div>
+<div id="blocklyDiv"></div>
+<xml id="toolbox" style="display: none">
+    <block type="controls_if"></block>
+    <block type="logic_compare"></block>
+    <block type="controls_repeat_ext"></block>
+    <block type="math_number"></block>
+    <block type="math_arithmetic"></block>
+    <block type="text"></block>
+    <block type="text_print"></block>
+</xml>
+<script>
+    var gw = null;
+
+    window.addEventListener('load', () => {
+        var GW = GraphWidget.GraphWidget;
+        gw = new GW('#graph', {
+            panningEnabled: true,
+            userPanningEnabled: true,
+            boxSelectionEnabled: true,
+            extension : {
+                panzoom: {}  ////////////////////////////////////////////////
+            }
+        });
+
+        gw.afterInitExtension().then(() => {
+            gw.add([
+                {group: "nodes", data: {id: "n0", name: 'key'}, position: {x: 100, y: 100}},
+                {group: "nodes", data: {id: "n1", name: 'value'}, position: {x: 200, y: 200}},
+                {group: "nodes", data: {id: "n2", name: 'key2'}, position: {x: 200, y: 400}},
+                {group: "nodes", data: {id: "n3", name: 'value2'}, position: {x: 300, y: 500}},
+                {group: "edges", data: {id: "e0", source: "n0", target: "n1", label: 'rel'}}
+            ])
+        });
+        //==================================
+        var blocklyArea = document.getElementById('blocklyArea');
+        var blocklyDiv = document.getElementById('blocklyDiv');
+        var workspacePlayground = Blockly.inject(blocklyDiv,    {toolbox: document.getElementById('toolbox')});
+        var onresize = function(e) {
+            // Compute the absolute coordinates and dimensions of blocklyArea.
+            var element = blocklyArea;
+            var x = 0;
+            var y = 0;
+            do {
+                x += element.offsetLeft;
+                y += element.offsetTop;
+                element = element.offsetParent;
+            } while (element);
+            // Position blocklyDiv over blocklyArea.
+            blocklyDiv.style.left = x + 'px';
+            blocklyDiv.style.top = y + 'px';
+            blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
+            blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+        };
+        window.addEventListener('resize', onresize, false);
+        onresize();
+        Blockly.svgResize(workspacePlayground);
+
+    })
+</script>
+
+<div class="blocklyWidgetDiv"></div>
+<div class="blocklyTooltipDiv"></div>
+
 </body>
 </html>
