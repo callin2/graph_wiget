@@ -597,6 +597,20 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
                 aTag.dispatchEvent(evt);
                 aTag.remove();
             }
+            case 'json': {
+                let aTag = document.createElement('a');
+
+                var blob = new Blob([JSON.stringify(this.cy.json())], {type: "application/json"});
+                var jsonurl  = URL.createObjectURL(blob);
+
+                aTag.setAttribute('href', jsonurl);
+                aTag.setAttribute('download', '');
+                document.getElementsByTagName('body')[0].appendChild(aTag);
+                let evt = document.createEvent('mouseevent');
+                evt.initEvent('click',true,true);
+                aTag.dispatchEvent(evt);
+                aTag.remove();
+            }
         }
     }
 
