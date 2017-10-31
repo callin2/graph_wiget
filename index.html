@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
     <script src="ext/coffeescript.js"></script>
     <style>
         body,html {
@@ -16,16 +20,16 @@
 <body>
 <div style="background-color: #d9d9d9; height:30px">
     <span style="color:#8e2918; font-weight: bold">예제를 선택하세요!</span>
-    <button onclick="simple()" data-url="test/index.html">simple</button>
-    <button onclick="simple()" data-url="test/custom_style.html">style</button>
-    <button onclick="simple()" data-url="test/zoom_wheel.html">zoom wheel</button>
-    <button onclick="simple()" data-url="test/zoom_ui.html">zoom ui</button>
-    <button onclick="simple()" data-url="test/zoom_ui_only.html">zoom ui only</button>
-    <button onclick="simple()" data-url="test/pan_boxselection.html">pan / box selection</button>
-    <button onclick="simple()" data-url="test/vertex_event.html">click event</button>
-    <button onclick="simple()" data-url="test/export_img.html">export png</button>
-    <button onclick="simple()" data-url="test/layout.html">layout</button>
-    <button onclick="simple()" data-url="test/expand_event.html">node expand</button>
+    <button data-url="test/index.html">simple</button>
+    <button data-url="test/custom_style.html">style</button>
+    <button data-url="test/zoom_wheel.html">zoom wheel</button>
+    <button data-url="test/zoom_ui.html">zoom ui</button>
+    <button data-url="test/zoom_ui_only.html">zoom ui only</button>
+    <button data-url="test/pan_boxselection.html">pan / box selection</button>
+    <button data-url="test/vertex_event.html">click event</button>
+    <button data-url="test/export_img.html">export png/json</button>
+    <button data-url="test/layout.html">layout</button>
+    <button data-url="test/expand_event.html">node expand</button>
 </div>
 <iframe id="myFrame" src="" frameborder="0"  style="width:50%;height:calc(100% - 30px)"></iframe>
 <div style="width:50%;height:calc(100% - 30px); float: right;background-color: antiquewhite; overflow: auto">
@@ -33,24 +37,11 @@
 </div>
 
 <script type="text/coffeescript">
-    $ = (selector) -> document.querySelector(selector)
-
-    xhr = (url) ->
-        new Promise((resolve,reject)->
-            request = new XMLHttpRequest();
-            request.open('GET', url, true);
-
-            request.onload = ->
-                if (request.status >= 200 && request.status < 400)
-                    resolve(request.responseText)
-                else reject()
-
-            request.send();
-        )
-
-    window.simple = (evt)->
-        $('#myFrame').setAttribute('src', window.event.target.getAttribute('data-url'))
-        xhr(window.event.target.getAttribute('data-url')).then (resp)->$('#srcText').textContent = resp
+$ ->
+    $('button').click (evt)->
+        url = $(evt.target).data('url')
+        $('#myFrame').attr('src', url)
+        $.get(url).then (resp)->$('#srcText').text resp
 </script>
 </body>
 </html>
