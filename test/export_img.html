@@ -37,9 +37,10 @@
 
         document.getElementById('pngBtn').addEventListener('click',()=>{
             gw.export();
+            // gw.export('png','mygraph.png');   <-- 동작함
         })
         document.getElementById('jsonBtn').addEventListener('click',()=>{
-            gw.export('json');
+            gw.export('json','hello.json');
         })
 
 

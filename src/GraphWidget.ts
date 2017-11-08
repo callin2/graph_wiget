@@ -585,12 +585,18 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         }
     }
 
-    public export(type='png'): void {
+    /**
+     *
+     * @param {string} type
+     * @param {string} filename
+     */
+    public export(type='png', filename?:string): void {
+        filename = filename ? filename : 'noname';
         switch(type) {
             case 'png': {
                 let aTag = document.createElement('a');
                 aTag.setAttribute('href', this.cy.png());
-                aTag.setAttribute('download', '');
+                aTag.setAttribute('download', filename);
                 document.getElementsByTagName('body')[0].appendChild(aTag);
                 let evt = document.createEvent('mouseevent');
                 evt.initEvent('click',true,true);
@@ -604,7 +610,7 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
                 var jsonurl  = URL.createObjectURL(blob);
 
                 aTag.setAttribute('href', jsonurl);
-                aTag.setAttribute('download', '');
+                aTag.setAttribute('download', filename);
                 document.getElementsByTagName('body')[0].appendChild(aTag);
                 let evt = document.createEvent('mouseevent');
                 evt.initEvent('click',true,true);
