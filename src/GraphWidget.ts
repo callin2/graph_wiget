@@ -418,7 +418,6 @@ var layoutPreset = {
 };
 
 var defaultSetting = {
-    // container: document.getElementById('agens-graph'),
     container: null,
     style: defaultStyle,
     elements: {nodes: [], edges: []},   // agens.graph.demoData[0],
@@ -509,7 +508,6 @@ function makeid(): string {
     return text;
 }
 
-
 /**
  *
  */
@@ -527,6 +525,9 @@ export interface IGraphWidget {
  *
  */
 export class GraphWidget extends EventEmitter implements IGraphWidget {
+    /**
+     *
+     */
     _afterInitFn: { resolve: (value?: any) => void; reject: (reason?: any) => void; };
     cy: any;
     lastMousePosition: Point;
@@ -584,12 +585,32 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         }
     }
 
-    public export(type='png'): void {
+    /**
+     *
+     * @param {string} type
+     * @param {string} filename
+     */
+    public export(type='png', filename?:string): void {
+        filename = filename ? filename : 'noname';
         switch(type) {
             case 'png': {
                 let aTag = document.createElement('a');
                 aTag.setAttribute('href', this.cy.png());
-                aTag.setAttribute('download', '');
+                aTag.setAttribute('download', filename);
+                document.getElementsByTagName('body')[0].appendChild(aTag);
+                let evt = document.createEvent('mouseevent');
+                evt.initEvent('click',true,true);
+                aTag.dispatchEvent(evt);
+                aTag.remove();
+            }
+            case 'json': {
+                let aTag = document.createElement('a');
+
+                var blob = new Blob([JSON.stringify(this.cy.json())], {type: "application/json"});
+                var jsonurl  = URL.createObjectURL(blob);
+
+                aTag.setAttribute('href', jsonurl);
+                aTag.setAttribute('download', filename);
                 document.getElementsByTagName('body')[0].appendChild(aTag);
                 let evt = document.createEvent('mouseevent');
                 evt.initEvent('click',true,true);

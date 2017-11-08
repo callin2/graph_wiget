@@ -1,4 +1,72 @@
 /**
+ * <pre uml>
+ *     @startuml
+ *
+ *
+ *      interface Point {
+ *          x : number
+ *          y : number
+ *          <<optional>> z : number
+ *      }
+ *
+ *      interface VertexData {
+ *          id : vertexId(string | number)
+ *          <<optional>> parent : vertexId
+ *          <<optional>> props : any
+ *      }
+ *
+ *      interface Vertex {
+ *          <<optional>> group : string
+ *          data : VetexData
+ *          <<optional>> position: Point
+ *          <<optional>> classes: string
+ *      }
+ *
+ *      interface EdgeData {
+ *          <<optional>> id : string | number
+ *          source : vertexId
+ *          target : vertexId
+ *          <<optional>> props : any
+ *      }
+ *
+ *      interface Edge {
+ *          <<optional>> group : string
+ *          data : VetexData
+ *          <<optional>> classes: string
+ *      }
+ *
+ *      Vertex -> Point : position
+ *      Vertex --> VertexData : data
+ *      Edge --> EdgeData : data
+ *
+ *      interface GraphData {
+ *          nodes : Vertex[]
+ *          edges : Edge[]
+ *          <<optional>> meta? : GraphData
+ *          <<optional>> props : any
+ *      }
+ *
+ *      GraphData --> Vertex
+ *      GraphData --> Edge
+ *      GraphData --> GraphData : meta
+ *
+ *      class GraphDataProvider <<abstract>> {
+ *          <<abstract>> configure( config:any) : Promise
+ *      }
+ *
+ *      class StaticGraphDataProvider <<abstract>> {
+ *          abstract loadAll(): Promise<GraphData>;
+            abstract load(callbackObj: {});
+ *      }
+ *
+ *      GraphDataProvider <|-- StaticGraphDataProvider
+ *
+ *     @enduml
+ * </uml>
+ */
+
+
+/**
  * 2D or 3D point
  */
 export interface Point {
