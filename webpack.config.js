@@ -3,16 +3,15 @@ var webpack = require('webpack');
 
 module.exports = {
     entry: {
-        GraphWidget:'./src/GraphWidget.ts'
+        GraphWidget:'./src/GraphWidget.ts',
+        OperationWidget:'./src/OperationWidget.ts'
     },
     output: {
         filename: "[name].js",
         devtoolLineToLine: true,
         sourceMapFilename: "[file].map",
         path: path.resolve(__dirname, 'dist'),
-        // pathinfo: true,  // must be removed at production
         publicPath: "/dist/",
-
         libraryTarget: "var",
         library: "[name]"
     },
