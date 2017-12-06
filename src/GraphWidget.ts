@@ -554,11 +554,15 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
             container: this.rootElement,
             ready: (e) => {
                 this.cy = e.cy;
-                this.onReady()
+                setTimeout(()=>{
+                    this.onReady()
+                },0)
             }
         });
 
-        this.initExtLayout_euler();
+        if(this.config.layout.name == 'euler') {
+            this.initExtLayout_euler();
+        }
         this.cy = cytoscape(this.config)
     }
 
@@ -731,10 +735,10 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     }
 
     initExtension() {
-        console.log('initExtension', this.config.extension)
+        // console.log('initExtension', this.config.extension)
 
         Object.keys(this.config.extension).forEach((key) => {
-            console.log(key, this.config.extension[key])
+            // console.log(key, this.config.extension[key])
             this['initExt_' + key](this.config.extension[key])
         });
 
@@ -817,8 +821,10 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         this.initExtension();
         this.initEvent();
 
-        this.layout = this.cy.makeLayout(this.config.layout)
-        this.layout.run()
+        if(this.config.layout.name != 'preset') {
+            this.layout = this.cy.makeLayout(this.config.layout)
+            this.layout.run()
+        }
 
         // 화면에 맞게 elements 정렬
         this.cy.fit(this.cy.elements(), 50); // fit to all the layouts

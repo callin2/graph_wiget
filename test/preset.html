@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Click Event</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <script src="../dist/GraphWidget.js"></script>
+    <style>
+        html,body { height: 100%; margin: 0px; padding: 0px; overflow: hidden;}
+    </style>
+</head>
+<body>
+<button>add random node</button>
+<div id='graph' style="width: 100%; height: 100%;"></div>
+<script>
+    window.addEventListener('load', () => {
+        var GW = GraphWidget.GraphWidget;
+        var gw = new GW('#graph',{
+            extension: {panzoom: {}},
+            layout: {
+                name: 'preset'
+            },
+            style: [
+                {
+                    selector: 'node',
+                    css: {
+                        'label': 'data(name)',
+                        'text-halign': 'center',
+                        'text-valign': 'center',
+                        'color': 'white',
+                        'font-weight': 700,
+                        'text-opacity': 1,
+                        'text-outline-width': 2,
+                        'text-outline-color': '#ff0000',
+                        'background-color': '#1abde8',
+                        // 'shape': 'eclipse',
+                        'width': '50px',
+                        'height': '50px',
+                        'border-width': '2',
+                        'border-color': 'white'
+                    }
+                },
+                {
+                    selector: 'node:selected',
+                    css: {
+                        'background-color': '#1aada8',
+                        'border-color': 'black',
+                        'width': '60px',
+                        'height': '60px'
+                    }
+                },
+                {
+                    selector: 'edge',
+                    css: {
+                        'label': 'data(label)',
+                        'color': '#1abde8',
+                        'opacity': 1,
+                        'text-outline-width': 2,
+                        'text-outline-color': 'white',
+                        'line-color': '#770033',
+                        'line-style': 'solid',
+                        'width': 2,
+                        'curve-style': 'bezier',
+                        'target-arrow-shape': 'triangle',
+                        'target-arrow-color': '#1abde8',
+                        'source-arrow-shape': 'none',
+                        'source-arrow-color': '#1abde8',
+                        'font-size': 12
+                    }
+                }
+            ]
+        });
+
+
+
+        gw.afterInitExtension().then(() => {
+            console.log('aaa')
+            gw.add([
+                {group: "nodes", data: {id: "n0", name: 'key'}, position: {x: 100, y: 100}},
+                {group: "nodes", data: {id: "n1", name: 'value'}, position: {x: 200, y: 200}},
+                {group: "nodes", data: {id: "n2", name: 'key2'}, position: {x: 10, y: 10}},
+                {group: "nodes", data: {id: "n3", name: 'value2'}, position: {x: 20, y: 20}},
+                {group: "nodes", data: {id: "n4", name: 'key3'}, position: {x: 150, y: 150}},
+                {group: "nodes", data: {id: "n5", name: 'value3'}, position: {x: 20, y: 200}},
+                {group: "nodes", data: {id: "n6", name: 'key4'}, position: {x: 10, y: 100}},
+                {group: "nodes", data: {id: "n7", name: 'value4'}, position: {x: 200, y: 20}},
+                {group: "edges", data: {id: "e0", source: "n0", target: "n1", label: 'rel'}}
+            ])
+        });
+
+        $('button').click(function (){
+            gw.add([
+                {group: "nodes", data: {id: "n"+Math.random(), name: 'key'}, position: {x: Math.random()*800, y: Math.random()*800}},
+            ])
+        })
+
+    })
+</script>
+</body>
+</html>
