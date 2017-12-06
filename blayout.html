@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.2.7/cytoscape.js"></script>
+    <script src="./ext/coffeescript.js"></script>
+</head>
+<body>
+<button>add random node</button>
+<div id="cy" style="height:1000px;"></div>
+</body>
+<script type="text/coffeescript">
+$ ->
+    console.log 'aa'
+
+    cy = cytoscape {
+        container: document.getElementById('cy')
+        layout: { name: 'preset' }
+    }
+
+    cy.add([
+        {group: "nodes", data: {id: "n0", name: 'key'}, position: {x: 100, y: 100}},
+        {group: "nodes", data: {id: "n1", name: 'value'}, position: {x: 200, y: 200}},
+        {group: "nodes", data: {id: "n2", name: 'key2'}, position: {x: 10, y: 10}},
+        {group: "nodes", data: {id: "n3", name: 'value2'}, position: {x: 20, y: 20}},
+        {group: "nodes", data: {id: "n4", name: 'key3'}, position: {x: 150, y: 150}},
+        {group: "nodes", data: {id: "n5", name: 'value3'}, position: {x: 20, y: 200}},
+        {group: "nodes", data: {id: "n6", name: 'key4'}, position: {x: 10, y: 100}},
+        {group: "nodes", data: {id: "n7", name: 'value4'}, position: {x: 200, y: 20}},
+        {group: "edges", data: {id: "e0", source: "n0", target: "n1", label: 'rel'}}
+    ])
+
+    console.log 'bb'
+    cy.forceRender()
+
+    $('button').click ->
+        cy.add([
+            {group: "nodes", data: {id: "n"+Math.random(), name: 'key'}, position: {x: Math.random()*800, y: Math.random()*800}},
+        ])
+
+
+</script>
+</html>
