@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zoom UI</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <script src="../dist/GraphWidget.js"></script>
+    <style>
+        html,body { height: 100%; margin: 0px; padding: 0px; overflow: hidden;}
+    </style>
+</head>
+<body>
+<button id="rmBtn">remove n0</button>
+<button id="rmgoodBtn">remove good class</button>
+<button id="rmbadBtn">remove bad class</button>
+<div id='graph' style="width: 100%; height: 100%;"></div>
+<script>
+  window.addEventListener('load', () => {
+    var GW = GraphWidget.GraphWidget;
+    var gw = new GW('#graph', {
+      extension : {
+        panzoom: {}  ////////////////////////////////////////////////
+      }
+    });
+
+    gw.afterInitExtension().then(() => {
+      gw.add([
+        {group: "nodes", data: {id: "n0", name: 'key'}, position: {x: 100, y: 100} , classes: 'good' },
+        {group: "nodes", data: {id: "n1", name: 'value'}, position: {x: 200, y: 200} , classes: 'good bad'},
+        {group: "nodes", data: {id: "n2", name: 'key'}, position: {x: Math.random()*200, y: Math.random()*200} , classes: 'good' },
+        {group: "nodes", data: {id: "n3", name: 'value'}, position: {x: Math.random()*200, y: Math.random()*200} , classes: 'good bad'},
+        {group: "nodes", data: {id: "n4", name: 'key'}, position: {x: Math.random()*200, y: Math.random()*200} , classes: '' },
+        {group: "nodes", data: {id: "n5", name: 'value'}, position: {x: Math.random()*200, y: Math.random()*200} , classes: ' bad'},
+        {group: "nodes", data: {id: "n6", name: 'key'}, position: {x: Math.random()*200, y: Math.random()*200} , classes: '' },
+        {group: "nodes", data: {id: "n7", name: 'value'}, position: {x: Math.random()*200, y: Math.random()*200} , classes: ' bad'},
+        {group: "edges", data: {id: "e0", source: "n0", target: "n1", label: 'rel'}}
+      ])
+    });
+
+
+
+    document.getElementById('rmBtn').addEventListener('click',()=>{
+      gw.remove('#n0');
+    })
+
+    document.getElementById('rmgoodBtn').addEventListener('click',()=>{
+      gw.remove('.good');
+    })
+
+    document.getElementById('rmbadBtn').addEventListener('click',()=>{
+      gw.remove('.bad');
+    })
+
+  })
+
+
+
+
+</script>
+</body>
+</html>
