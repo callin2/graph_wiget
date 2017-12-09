@@ -835,6 +835,13 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         this.cy.remove('node')
     }
 
+
+    public remove(selector) {
+        this.cy.$(selector).remove()
+    }
+
+
+
     public selectByAttr(attrName:string, attrValue:string) {
         this.cy.$('node, edge').unselect()
         this.cy.$(`node[${attrName}="${attrValue}"]`).select()
