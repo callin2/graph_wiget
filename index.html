@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism-twilight.min.css">
     <script
             src="https://code.jquery.com/jquery-3.2.1.min.js"
             integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
             crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.js"></script>
     <script src="ext/coffeescript.js"></script>
     <style>
         body,html {
@@ -18,8 +20,8 @@
     </style>
 </head>
 <body>
-<div style="background-color: #d9d9d9; height:30px">
-    <span style="color:#8e2918; font-weight: bold">예제를 선택하세요!</span>
+<div style="background-color: #d9d9d9; height:50px; overflow-x: scroll; overflow-y: hidden; white-space: nowrap;">
+    <span style="color:#8e2918; font-weight: bold">예제를 선택하세요!</span><br>
     <button data-url="test/index.html">simple</button>
     <button data-url="test/custom_style.html">style</button>
     <button data-url="test/zoom_wheel.html">zoom wheel</button>
@@ -32,10 +34,18 @@
     <button data-url="test/expand_event.html">node expand</button>
     <button data-url="test/preset.html">preset layout</button>
     <button data-url="test/remove.html">remove</button>
+    <button data-url="test/edge_width.html">링크 두께</button>
+    <button data-url="test/node_size.html">node size</button>
+    <button data-url="test/shape.html">node shape</button>
+    <button data-url="test/dynamic_style.html">dynamic style</button>
+    <button data-url="test/semantic_zoom.html">semantic zoom</button>
 </div>
-<iframe id="myFrame" src="" frameborder="0"  style="width:50%;height:calc(100% - 30px)"></iframe>
-<div style="width:50%;height:calc(100% - 30px); float: right;background-color: antiquewhite; overflow: auto">
-    <pre id="srcText"></pre>
+<iframe id="myFrame" src="" frameborder="0"  style="height:calc(50% - 30px);width:100%;"></iframe>
+<div style="height:50%;width:100%; background-color: antiquewhite; overflow: auto">
+    <pre class="lang-markup">
+        <code id="srcText" class=" lang-markup" ></code>
+    </pre>
+
 </div>
 
 <script type="text/coffeescript">
@@ -43,7 +53,9 @@ $ ->
     $('button').click (evt)->
         url = $(evt.target).data('url')
         $('#myFrame').attr('src', url)
-        $.get(url).then (resp)->$('#srcText').text resp
+        $.get(url).then (resp)->
+            $('#srcText').html Prism.highlight(resp, Prism.languages.markup, 'html')
+
 </script>
 </body>
 </html>

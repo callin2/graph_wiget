@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dynamic Style</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <script src="../dist/GraphWidget.js"></script>
+</head>
+<body>
+<button id="togglezoom">toggle zoom mode</button>
+<div id='graph' style="width: 1200px; height: 800px;border: 1px solid black;"></div>
+
+<script>
+    window.addEventListener('load', ()=>{
+        //console.log('GraphWidget', GraphWidget.GraphWidget)
+        var GW = GraphWidget.GraphWidget
+        var gw = new GW('#graph', {
+            extension: {panzoom: {}},
+            style: [
+                {
+                    selector: 'node',
+                    css: {
+                        'label': (d)=>{
+                            return d.data('name');
+                        },
+                        'text-halign': 'center',
+                        'text-valign': 'center',
+                        'color': 'white',
+                        'font-weight': (d)=>{
+                            return d.data('price') * 2;
+                        },
+                        'text-opacity': 1,
+                        'text-outline-width': (d)=>{
+                            return d.data('saleAmount') / 30;
+                        },
+                        'text-outline-color': '#ff0000',
+                        'background-color': '#1abde8',
+                        // 'shape': 'eclipse',
+                        'width': '50px',
+                        'height': '50px',
+                        'border-width': '2',
+                        'border-color': 'white'
+                    }
+                },
+                {
+                    selector: 'node:selected',
+                    css: {
+                        'background-color': '#1aada8',
+                        'border-color': 'black',
+                        'width': '60px',
+                        'height': '60px'
+                    }
+                },
+                {
+                    selector: 'edge',
+                    css: {
+                        'label': 'data(label)',
+                        'color': (d)=>{
+                            switch(d.data('label')) {
+                                case 'a': return 'red'
+                                case 'b': return 'green'
+                            }
+                        },
+                        'opacity': 1,
+                        'text-outline-width': 2,
+                        'text-outline-color': 'white',
+                        'line-color': (d)=>{
+                            switch(d.data('label')) {
+                                case 'a': return 'red'
+                                case 'b': return 'green'
+                            }
+                        },
+                        'line-style': 'solid',
+                        'width': 2,
+                        'curve-style': 'bezier',
+                        'target-arrow-shape': 'triangle',
+                        'target-arrow-color': '#1abde8',
+                        'source-arrow-shape': 'none',
+                        'source-arrow-color': '#1abde8',
+                        'font-size': 12
+                    }
+                }
+            ]
+        })
+
+
+
+        // 데이타를 받아 왔으면 아래 로직처럼 추가
+        gw.add([
+            {group: "nodes", data: {id: "n0", name: 'key', price:100, saleAmount: 50, label:'product'}, position: {x: 10, y: 10}},
+            {group: "nodes", data: {id: "n1", name: 'value', price:200, saleAmount: 40, label:'product'}, position: {x: 200, y: 200}},
+            {group: "nodes", data: {id: "n2", name: 'x', price:300, saleAmount: 30, label:'user'}, position: {x: 100, y: 500}},
+            {group: "nodes", data: {id: "n3", name: 'y', price:400, saleAmount: 20, label:'user'}, position: {x: 500, y: 100}},
+            {group: "edges", data: {id: "e0", source: "n0", target: "n1", label: 'a', weight:10 }},
+            {group: "edges", data: {id: "e1", source: "n0", target: "n2", label: 'b', weight:5 }}
+        ])
+
+        $('#togglezoom').click(()=>{
+            gw.toggleSemanticZoom()
+        })
+    })
+</script>
+
+</body>
+</html>

@@ -536,6 +536,8 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     removeElementWhenDestroy: boolean;
     layout: any;
     neighborDepth: number;
+    isSemanticZoom: boolean;
+    prevZoom: number;
 
     /**
      *
@@ -766,6 +768,54 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
             console.log('layoutstop')
             this.fire('layoutstop', evt)
         })
+
+
+        // node edge size 고장
+        this.cy.on('zoom',()=>{
+
+            if(!this.isSemanticZoom) return;
+
+            var zoom = this.cy.zoom();
+
+            // console.log(zoom)
+
+            var nodeSize = 20 / zoom
+            var edgeSize = 3 / zoom
+
+
+            const widthFunc = (d)=>{
+                var orgSize = this.prevZoom * d.width()
+                // console.log(d, d.width())
+                return orgSize / zoom;
+            }
+
+            const heightFunc = (d)=>{
+                var orgSize = this.prevZoom * d.height()
+                // console.log(d, d.height())
+                return orgSize / zoom;
+            }
+
+            const fontSizeFunc = (d)=>{
+                var orgSize = this.prevZoom * d.numericStyle('font-size')
+                // console.log('font-siz', d.style('font-size'))
+                return orgSize / zoom
+            }
+
+            this.cy.batch(()=>{
+                this.cy.$('node').style({
+                    width: widthFunc,
+                    height: heightFunc,
+                    "font-size":fontSizeFunc
+                });
+
+                // this.cy.$('edge').style({
+                //     width: edgeSize
+                // })
+            });
+
+            this.prevZoom = zoom;
+
+        });
     }
 
     private nodeClickHandler(evt: any) {
@@ -804,9 +854,9 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
             this.cy.animation({
                 fit: {
                     eles: d2Col,
-                    padding: 200
+                    padding: 20
                 },
-                duration: 500
+                duration: 200
             }).play()
         },0)
     }
@@ -840,6 +890,12 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         this.cy.$(selector).remove()
     }
 
+    toggleSemanticZoom() {
+        this.isSemanticZoom = !this.isSemanticZoom;
+        this.prevZoom = this.cy.zoom();
+
+        console.log('prevZoom', this.prevZoom)
+    }
 
 
     public selectByAttr(attrName:string, attrValue:string) {
