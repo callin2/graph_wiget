@@ -19,7 +19,10 @@ var defaultMapper = {
         position: (n)=>n.viz.position,
     },
     edge:{
-        data: e=>({source: e.source, target: e.target})
+        data: e=>{
+            debugger
+            return ({source: e.source, target: e.target})
+        }
     }
 };
 

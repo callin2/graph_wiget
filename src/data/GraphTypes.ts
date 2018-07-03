@@ -1,6 +1,6 @@
 /**
  * <pre uml>
- *     @startuml
+ *  @startuml
  *
  *
  *      interface Point {
@@ -56,15 +56,16 @@
  *
  *      class StaticGraphDataProvider <<abstract>> {
  *          abstract loadAll(): Promise<GraphData>;
-            abstract load(callbackObj: {});
+ *          abstract load(callbackObj: {});
  *      }
  *
  *      GraphDataProvider <|-- StaticGraphDataProvider
  *
- *     @enduml
- * </uml>
+ *  @enduml
+ * </pre>
  */
 
+//==================
 
 /**
  * 2D or 3D point

@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/GraphWidget.ts",
   "scripts": {
-    "build": "./node_modules/.bin/webpack",
+    "build": "./node_modules/.bin/webpack -w",
     "start": "./node_modules/.bin/http-server .",
     "docs": "./node_modules/.bin/typedoc --out docs src"
   },
@@ -20,24 +20,25 @@
   "homepage": "https://github.com/callin2/graph_wiget#readme",
   "dependencies": {
     "blockly": "^1.0.0",
-    "cytoscape": "^3.2.3",
+    "cytoscape": "^3.2.14",
     "cytoscape-cxtmenu": "^2.10.3",
-    "cytoscape-euler": "^1.0.0",
+    "cytoscape-euler": "^1.2.1",
     "cytoscape-panzoom": "^2.5.2",
     "cytoscape-qtip": "^2.7.1",
     "cytoscape.js-undo-redo": "^1.0.1",
     "gexf": "^0.2.5",
-    "jquery": "^3.2.1"
+    "jquery": "^3.3.1"
   },
   "devDependencies": {
-    "awesome-typescript-loader": "^3.2.3",
-    "coffeescript": "^2.0.1",
-    "css-loader": "^0.28.7",
-    "cytoscape-view-utilities": "^2.0.6",
+    "awesome-typescript-loader": "^3.5.0",
+    "coffeescript": "^2.3.1",
+    "css-loader": "^0.28.11",
+    "cytoscape-view-utilities": "^2.2.0",
     "http-server": "^0.10.0",
+    "marked": "^0.4.0",
     "style-loader": "^0.18.2",
     "typedoc": "^0.8.0",
     "typedoc-webpack-plugin": "^1.1.4",
-    "webpack": "^3.5.6"
+    "webpack": "^3.12.0"
   }
 }
