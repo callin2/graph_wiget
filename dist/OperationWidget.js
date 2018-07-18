@@ -61,16 +61,16 @@ var OperationWidget =
 /******/ 	__webpack_require__.p = "/dist/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 31);
+/******/ 	return __webpack_require__(__webpack_require__.s = 34);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 31:
+/***/ 34:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("\r\nObject.defineProperty(exports, \"__esModule\", { value: true });\r\nvar OperationWidget = (function () {\r\n    function OperationWidget() {\r\n    }\r\n    return OperationWidget;\r\n}());\r\nexports.OperationWidget = OperationWidget;\r\n\n\n//////////////////\n// WEBPACK FOOTER\n// ./src/OperationWidget.ts\n// module id = 31\n// module chunks = 1\n\n//# sourceURL=webpack:///./src/OperationWidget.ts?");
+eval("\r\nObject.defineProperty(exports, \"__esModule\", { value: true });\r\nvar OperationWidget = (function () {\r\n    function OperationWidget() {\r\n    }\r\n    return OperationWidget;\r\n}());\r\nexports.OperationWidget = OperationWidget;\r\n\n\n//////////////////\n// WEBPACK FOOTER\n// ./src/OperationWidget.ts\n// module id = 34\n// module chunks = 1\n\n//# sourceURL=webpack:///./src/OperationWidget.ts?");
 
 /***/ })
 

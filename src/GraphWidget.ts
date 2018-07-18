@@ -6,6 +6,8 @@ import * as cxtmenu from 'cytoscape-cxtmenu';
 import * as cyqtip from 'cytoscape-qtip';
 import * as panzoom from 'cytoscape-panzoom';
 
+// const cxtmenu = require('cyto_cxtmenu')
+
 require('cytoscape-panzoom/cytoscape.js-panzoom.css');
 
 import * as euler from 'cytoscape-euler';
@@ -562,9 +564,9 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
             }
         });
 
-        if(this.config.layout.name == 'euler') {
+        // if(this.config.layout.name == 'euler') {
             this.initExtLayout_euler();
-        }
+        // }
         this.cy = cytoscape(this.config)
     }
 
@@ -770,7 +772,7 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         })
 
 
-        // node edge size 고장
+        // node edge size 고정
         this.cy.on('zoom',()=>{
 
             if(!this.isSemanticZoom) return;
@@ -887,7 +889,7 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
 
 
     public remove(selector) {
-        this.cy.$(selector).remove()
+        return this.cy.$(selector).remove()
     }
 
     toggleSemanticZoom() {
