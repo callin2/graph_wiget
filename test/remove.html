@@ -106,6 +106,10 @@
         document.getElementById('rmSelectedBtn').addEventListener('click', () => {
             const selectedElems = gw.filter(":selected");
 
+            selectedElems.forEach(el=>{
+                console.log(el.json())
+            })
+
             removedElements.push(gw.remove( selectedElems  ));
         });
 
