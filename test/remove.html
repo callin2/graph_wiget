@@ -22,6 +22,8 @@
 <button id="rmBtn">remove n0</button>
 <button id="rmgoodBtn">remove good class</button>
 <button id="rmbadBtn">remove bad class</button>
+<button id="rmByFuncBtn">remove by predicate func</button>
+<button id="rmSelectedBtn">remove Selected</button>
 <button id="restoreRemoved">restore removed</button>
 <div id='graph' style="width: 100%; height: 100%;"></div>
 <script>
@@ -40,31 +42,31 @@
                 {group: "nodes", data: {id: "n1", name: 'value'}, position: {x: 200, y: 200}, classes: 'good bad'},
                 {
                     group: "nodes",
-                    data: {id: "n2", name: 'key'},
+                    data: {id: "n2", name: 'key', propA: 100},
                     position: {x: Math.random() * 200, y: Math.random() * 200},
                     classes: 'good'
                 },
                 {
                     group: "nodes",
-                    data: {id: "n3", name: 'value'},
+                    data: {id: "n3", name: 'value', propA: 200},
                     position: {x: Math.random() * 200, y: Math.random() * 200},
                     classes: 'good bad'
                 },
                 {
                     group: "nodes",
-                    data: {id: "n4", name: 'key'},
+                    data: {id: "n4", name: 'key', propA: 300},
                     position: {x: Math.random() * 200, y: Math.random() * 200},
                     classes: ''
                 },
                 {
                     group: "nodes",
-                    data: {id: "n5", name: 'value'},
+                    data: {id: "n5", name: 'value', propA: 200},
                     position: {x: Math.random() * 200, y: Math.random() * 200},
                     classes: ' bad'
                 },
                 {
                     group: "nodes",
-                    data: {id: "n6", name: 'key'},
+                    data: {id: "n6", name: 'key', propA: 500},
                     position: {x: Math.random() * 200, y: Math.random() * 200},
                     classes: ''
                 },
@@ -81,15 +83,31 @@
 
         document.getElementById('rmBtn').addEventListener('click', () => {
             removedElements.push(gw.remove('#n0'));
-        })
+        });
 
         document.getElementById('rmgoodBtn').addEventListener('click', () => {
             removedElements.push(gw.remove('.good'));
-        })
+        });
 
         document.getElementById('rmbadBtn').addEventListener('click', () => {
             removedElements.push(gw.remove('.bad'));
-        })
+        });
+
+        document.getElementById('rmByFuncBtn').addEventListener('click', () => {
+            predicateFunc = (ele,i,eles)=>{
+                console.log(ele.data(), ele.json() )
+                return ele.data().propA == 200;
+            };
+
+            removedElements.push(gw.remove( predicateFunc ));
+        });
+
+
+        document.getElementById('rmSelectedBtn').addEventListener('click', () => {
+            const selectedElems = gw.filter(":selected");
+
+            removedElements.push(gw.remove( selectedElems  ));
+        });
 
         document.getElementById('restoreRemoved').addEventListener('click', () => {
             console.log('removedElements', removedElements)

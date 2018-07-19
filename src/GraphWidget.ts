@@ -899,6 +899,10 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         console.log('prevZoom', this.prevZoom)
     }
 
+    public filter(selector) {
+        return this.cy.$(selector);
+    }
+
 
     public selectByAttr(attrName:string, attrValue:string) {
         this.cy.$('node, edge').unselect()
