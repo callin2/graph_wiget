@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edge property</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.2/dat.gui.min.js"></script>
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <script src="../dist/GraphWidget.js"></script>
+</head>
+<body>
+
+<div id='graph' style="width: 1200px; height: 800px;border: 1px solid black;"></div>
+
+<script>
+    window.addEventListener('load', () => {
+        //console.log('GraphWidget', GraphWidget.GraphWidget)
+        var GW = GraphWidget.GraphWidget;
+
+        // 'cxtmenu' extension을 사용한다.
+        // node 에 'Expand'라는 이름의 context menu를 추가 하고 click 했을때 'node-expand' 이벤트가 발생하도록 한다.
+        // evtName은 아래 'on' method로 이벤트 핸들러를 등록할때 사용한다.
+        var gw = new GW('#graph',{
+            extension:{
+                cxtmenu: {
+                    edge: [
+                        {evtname: 'edge-prop', label: 'Property',  emit: true},
+                    ]
+                }
+            }
+        })
+
+        gw.afterInitExtension().then(() => {
+            // 이벤트
+            gw.on('edge-prop', (ele) => {
+                const props = ele.data()
+                console.log('edge-prop', props);
+
+                var gui = new dat.GUI();
+
+
+                const systemProps = {
+                    id: true,
+                    source: true,
+                    target: true,
+                    label: true
+                }
+
+
+                Object.keys(props)
+                    .filter(k=>!systemProps[k])
+                    .forEach(k=>{
+                        gui.add(props, k );
+                    })
+
+            });
+        });
+
+
+        // 데이타를 받아 왔으면 아래 로직처럼 추가
+        gw.add([
+            {group: "nodes", data: {id: "n0", name: 'key'}, position: {x: 100, y: 100}},
+            {group: "nodes", data: {id: "n1", name: 'value'}, position: {x: 200, y: 200}},
+            {group: "edges", data: {id: "e0", source: "n0", target: "n1", label: 'rel' , propA:'aaa', propB:'bbb', propC:123}}
+        ])
+    })
+</script>
+
+</body>
+</html>
