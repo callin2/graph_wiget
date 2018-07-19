@@ -548,7 +548,7 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     constructor(rootElement?: string | HTMLElement, protected config?: any) {
         super()
 
-        this.addSupportEvent(['click','layoutstop']);
+        this.addSupportEvent(['click','layoutstop','mouseout','mouseover','mousemove']);
 
         this.initRoot(rootElement);
 
@@ -757,6 +757,26 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
             // node 또는 edge 에서 발생한 click event 만 전파시킨다.
             if(evt.target.isNode) this.fire('click', evt)
         });
+
+        this.cy.on('mouseover',evt=>{
+            this.lastMousePosition = evt.position;
+            // node 또는 edge 에서 발생한 mouseover 만 전파시킨다.
+            if(evt.target.isNode || evt.target.isEdge) this.fire('mouseover', evt)
+        });
+
+        this.cy.on('mouseout',evt=>{
+            this.lastMousePosition = evt.position;
+            // node 또는 edge 에서 발생한 mouseover 만 전파시킨다.
+            if(evt.target.isNode || evt.target.isEdge) this.fire('mouseout', evt)
+        });
+
+        this.cy.on('mousemove',evt=>{
+            this.fire('mousemove', evt)
+        });
+
+
+
+
 
         this.cy.on('click','node', (evt)=>{
             this.nodeClickHandler(evt)

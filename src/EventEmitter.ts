@@ -27,6 +27,10 @@ export class EventEmitter {
         return !!this.supportEvents[evtName]
     }
 
+    protected getSupportedEventList() {
+        return ""+this.supportEvents;
+    }
+
     /**
      *
      * @param {string} eventName
