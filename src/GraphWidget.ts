@@ -548,7 +548,7 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
     constructor(rootElement?: string | HTMLElement, protected config?: any) {
         super()
 
-        this.addSupportEvent(['click','layoutstop','mouseout','mouseover','mousemove']);
+        this.addSupportEvent(['click','layoutstop','mouseout','mouseover','mousemove','boxselect','select']);
 
         this.initRoot(rootElement);
 
@@ -774,10 +774,6 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
             this.fire('mousemove', evt)
         });
 
-
-
-
-
         this.cy.on('click','node', (evt)=>{
             this.nodeClickHandler(evt)
         });
@@ -787,10 +783,27 @@ export class GraphWidget extends EventEmitter implements IGraphWidget {
         });
 
         this.cy.on('layoutstop', evt => {
-            console.log('layoutstop')
+            // console.log('layoutstop')
             this.fire('layoutstop', evt)
-        })
+        });
 
+        this.cy.on('boxend', evt => {
+            setTimeout(()=>{
+                // console.log('boxend', this.cy.$(':selected'))
+                this.fire('boxselect', this.cy.$(':selected'))
+            },0)
+
+        });
+
+        // this.cy.on('boxselect', evt => {
+        //     console.log('boxselect', evt)
+        //     this.fire('boxselect', evt)
+        // });
+
+        this.cy.on('select', evt => {
+            // console.log('select', evt)
+            this.fire('select', evt)
+        });
 
         // node edge size 고정
         this.cy.on('zoom',()=>{

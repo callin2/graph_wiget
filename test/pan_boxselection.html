@@ -49,6 +49,10 @@ shift + click , shift + drag
             }
         });
 
+        gw.on('boxselect',(evt)=>{
+            console.log(evt.target);
+        });
+
         gw.afterInitExtension().then(() => {
             gw.add([
                 {group: "nodes", data: {id: "n0", name: 'key'}, position: {x: 100, y: 100}},
