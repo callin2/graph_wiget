@@ -25,6 +25,7 @@
 <button id="rmByFuncBtn">remove by predicate func</button>
 <button id="rmSelectedBtn">remove Selected</button>
 <button id="restoreRemoved">restore removed</button>
+<button id="restoreRemovedStep">restore removed step by step</button>
 <div id='graph' style="width: 100%; height: 100%;"></div>
 <script>
     window.addEventListener('load', () => {
@@ -122,8 +123,15 @@
             }
 
             removedElements = []
-        })
+        });
 
+        document.getElementById('restoreRemovedStep').addEventListener('click', () => {
+            console.log('removedElements', removedElements)
+
+            let latestRemovedELems = removedElements.pop() || []
+            gw.add(latestRemovedELems)
+
+        })
 
 
     })
